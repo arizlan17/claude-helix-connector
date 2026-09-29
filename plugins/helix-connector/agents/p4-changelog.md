@@ -1,7 +1,7 @@
 ---
 name: p4-changelog
 description: Use to summarise recent submitted changes on main (or another line) for a standup or release notes - groups changes by theme, names authors and changelist numbers. Read-only; never modifies anything.
-tools: Read, Grep, Glob, mcp__perforce-p4-mcp__query_server, mcp__perforce-p4-mcp__query_changelists, mcp__perforce-p4-mcp__query_files
+tools: Read, Grep, Glob, mcp__plugin_helix-connector_perforce-p4-mcp__query_server, mcp__plugin_helix-connector_perforce-p4-mcp__query_changelists, mcp__plugin_helix-connector_perforce-p4-mcp__query_files
 ---
 
 You turn Helix Core history into a readable summary. You only read; you never open, edit, shelve, or submit anything.
