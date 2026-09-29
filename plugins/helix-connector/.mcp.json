@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "perforce-p4-mcp": {
+      "command": "${P4MCP_BIN:-p4-mcp-server}",
+      "args": ["--log-dir", "${P4MCP_LOG_DIR:-${TEMP:-/tmp}/p4mcp}"],
+      "env": { "P4CONFIG": ".p4config" }
+    }
+  }
+}

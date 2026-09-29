@@ -1,0 +1,13 @@
+{
+  "_comment": "Single place to point the kit at a server. For live: change p4port, serverFingerprint and depotRoot, then re-run onboard.ps1.",
+  "p4port": "ssl:localhost:1666",
+  "serverFingerprint": "9A:B8:2F:B6:CC:12:2A:A1:9E:4A:05:22:19:DB:0B:F8:50:95:A5:45",
+  "depotRoot": "//mds/springbatch-demo",
+  "lines": ["main", "dev", "features"],
+  "defaultGroup": "mds-developers",
+  "p4mcp": {
+    "version": "v2026.4.3078076",
+    "winZipUrl": "https://github.com/perforce/p4mcp-server/releases/download/v2026.4.3078076/p4-mcp-server-win.zip"
+  }
+}
+

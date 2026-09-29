@@ -1,0 +1,7 @@
+{
+  "name": "helix-connector",
+  "version": "0.1.0",
+  "description": "Connects Claude Code to Perforce Helix Core through the official P4 MCP server, with workflow skills and guardrails.",
+  "author": { "name": "MDS Platform Engineering" },
+  "keywords": ["perforce", "helix-core", "p4", "mcp", "sso"]
+}

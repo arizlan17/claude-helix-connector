@@ -1,0 +1,6 @@
+# Perforce connection for this workspace. Stays OUT of the depot (see .p4ignore).
+# Never put P4PASSWD or a ticket in this file: sign in with `p4 login` (Google SSO).
+P4PORT={{P4PORT}}
+P4USER={{P4USER}}
+P4CLIENT={{P4CLIENT}}
+P4IGNORE=.p4ignore

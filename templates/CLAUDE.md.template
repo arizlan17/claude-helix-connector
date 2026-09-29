@@ -1,0 +1,16 @@
+# Claude Code on Helix Core (Perforce)
+
+This folder is a Perforce workspace. Connection details (server, user, client) live in `.p4config`, which is never versioned. It is not a Git repository.
+
+## Version control rules
+- Use Perforce only. No git commands, no pull requests.
+- Prefer the `perforce-p4-mcp` MCP tools; use the `p4` CLI only as a fallback.
+- Depot files are read-only until opened: `modify_files` action `edit`. New files: `add`. Renames: `move`.
+- Depot layout: `{{DEPOT_ROOT}}/{main,dev,features}` maps to local `main/`, `dev/`, `features/`.
+- Developers cannot write to `main`. Work on a `features/<name>` line, shelve it, and wait for a human to review before anything is promoted.
+- Submit only when the user explicitly asks for it in that turn. Shelve by default.
+- Never ask for, print, or store a password or ticket. Never put `.p4config` in the depot.
+- If a command reports the login is invalid or expired, stop and tell the user to run `p4 login` (it opens Google SSO in the browser).
+
+## Project
+Match the existing module's conventions. Java projects here use Spring Boot 3 / Spring Batch 5 (`JobBuilder`, `StepBuilder`, explicit transaction manager). Build and test with `mvn verify`.

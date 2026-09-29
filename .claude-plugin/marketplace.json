@@ -1,0 +1,11 @@
+{
+  "name": "mds-helix",
+  "owner": { "name": "MDS Platform Engineering" },
+  "plugins": [
+    {
+      "name": "helix-connector",
+      "source": "./plugins/helix-connector",
+      "description": "Claude Code for Perforce Helix Core: MCP server, Perforce workflow skills, and safe-by-default agents (Google SSO via Helix Authentication)."
+    }
+  ]
+}

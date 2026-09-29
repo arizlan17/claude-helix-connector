@@ -1,0 +1,13 @@
+.p4config
+.p4ignore
+.env
+.env.*
+secrets/
+*.pem
+*.key
+target/
+logs/
+.idea/
+*.iml
+*.class
+.claude/settings.local.json
