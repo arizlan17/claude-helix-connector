@@ -22,6 +22,9 @@ Sign in with the Google account registered for your Perforce user.
 | Skill `p4-shelve-review` | How to hand work over without submitting |
 | Skill `p4-troubleshoot` | What each error means and what to tell you |
 | Agent `p4-reader` | Read-only questions; cannot modify anything |
+| Agent `p4-reviewer` | First-pass review of a shelved changelist: bugs, security, style. Read-only; a human still approves |
+| Agent `p4-changelog` | Summarises recent submitted changes (default: `main`) for standups or release notes. Read-only |
+| Agent `p4-guard` | Pre-flight check before shelving: no `.p4config`/credentials/keys being added, nothing targeting `main`. Read-only; reports PASS or BLOCKED |
 | Agent `p4-submitter` | Write operations; works on feature lines, shelves by default |
 | `/helix-status` | Connection and workspace summary |
 
@@ -34,8 +37,9 @@ Sign in with the Google account registered for your Perforce user.
 1. "Start a feature line `features/<my-name>-<topic>` from dev." (Claude uses the `p4-feature-line` skill.)
 2. "Add email validation to `CustomerProcessor` on that line, with a test."
 3. Claude syncs, `edit`s files into a numbered changelist, changes the code, runs `mvn verify`.
-4. "Shelve it." Claude reports the changelist number.
-5. A reviewer inspects the shelf (`query_shelves`). Promotion to `dev`/`main` is done by a reviewer or the release manager.
+4. "Check it, then shelve it." Claude runs the `p4-guard` agent first (no credentials or connection files, nothing aimed at `main`). On PASS it shelves and reports the changelist number; on BLOCKED it stops and tells you what to fix.
+5. "Review shelved changelist 12." Claude hands it to the `p4-reviewer` agent, which reads the diff (`query_shelves`) and reports findings and a verdict. It is advisory and changes nothing.
+6. A human reviewer then inspects the shelf and the report. Promotion to `dev`/`main` is done by a reviewer or the release manager.
 
 **Only when you say so:** "Submit changelist 12." Claude states the files and description first.
 
@@ -50,5 +54,6 @@ Sign in with the Google account registered for your Perforce user.
 - One topic per feature line.
 - Ask Claude to run `mvn verify` before shelving.
 - Use `p4-reader` for questions when you want a hard guarantee that nothing changes.
+- Ask for `p4-changelog` before a standup: "Summarise the last week on main for standup."
 
 Next: [06 - Admin operations](06-admin-operations.md)
