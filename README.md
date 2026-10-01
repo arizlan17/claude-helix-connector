@@ -39,7 +39,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 | `scripts/add-developer.ps1` | Admin: add a person |
 | `scripts/set-mcp-policy.ps1` | Admin: MCP `Standard` / `ReadOnly` / `Off` / `Reset` per group or user |
 | `templates/` | `.p4config`, `.p4ignore`, `.mcp.json`, `CLAUDE.md` templates |
-| `plugins/helix-connector/` | Plugin: `.mcp.json`, 4 skills, 5 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`), `/helix-status` |
+| `plugins/helix-connector/` | Plugin: `.mcp.json`, 5 skills, 6 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`, `p4-discoverer`), `/helix-status`, `/helix-init` |
 | `.claude-plugin/marketplace.json` | Marketplace definition |
 | `docs/` | Numbered guides |
 
