@@ -1,5 +1,20 @@
 # 06 - Admin operations
 
+## Roles and what each can do
+| Role | Sign-in | Group | Depot access | Can change server config? |
+|---|---|---|---|---|
+| **Developer** | Google SSO | `mds-developers` (12h ticket) | Read everything; write `dev/` and `features/` only | No |
+| **Release manager** | Google SSO | `mds-release` | Write everywhere, including `main` | No |
+| **Admin** (`p4admin`) | Local password (break-glass, not SSO) | none (super user) | Everything | Yes: users, groups, protections, `mcp.*` policy |
+| **Service account** (`svc-auth`) | Local ticket, never expires (not SSO) | `svc-accounts` | Super, used only by the Authentication Service extension | Not used by people |
+
+What developers cannot do: add users or groups, change protections, change MCP policy (`p4 property`), write `main`, or sign in with a Google account that does not match their Perforce Email. These need a super user and are enforced by the server, so editing local files (`.mcp.json`, `CLAUDE.md`, `.p4config`) does not raise a developer's access.
+
+Notes:
+- `add-developer.ps1` adds people to `mds-developers` only. Add release managers by hand: `p4 group mds-release`.
+- Claude acts as the signed-in person with that person's permissions, never more.
+- To stop developers adding unapproved MCP servers on their own PC, use the managed settings step in [08](08-going-live.md).
+
 ## Add a developer
 ```
 scripts\add-developer.ps1 -User jsmith -Email john.smith@mitrai.com -FullName "John Smith" -AdminUser p4admin
