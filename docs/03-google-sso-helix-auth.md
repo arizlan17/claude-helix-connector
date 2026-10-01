@@ -7,6 +7,23 @@
 | **Helix Authentication Extension** (in `p4d`) | Intercepts `p4 login`, sends the user to the service, compares identities, issues the ticket |
 | **Google OAuth client** | Identifies our service to Google |
 
+## Required during onboarding
+Google SSO is the only sign-in method, so `onboard.ps1` treats it as a required step (right after the prerequisite checks):
+1. **Explains the requirement:** sign-in goes through the Helix Authentication Service with Google as the OIDC provider, and the Google email must exactly match the **Email** on the Perforce user.
+2. **Asks for the Google account email** you will sign in with. Pass it as `-GoogleEmail` to skip the prompt. A value that is not a valid email stops onboarding. (`-SkipLogin` skips this prompt.)
+3. **Checks the service is reachable** at `auth.serviceUrl` in `connector.config.json` (default `https://localhost:3000`). If it is not, onboarding stops with a pointer to this page before it pins the certificate or writes any files.
+4. **Verifies identity after `p4 login`:** reads the Email on your Perforce user and compares it with the Google email you entered. A mismatch prints a warning asking you to have your admin align them.
+
+The `auth` block in `connector.config.json`:
+```json
+"auth": {
+  "method": "google-oidc",
+  "service": "Helix Authentication Service",
+  "serviceUrl": "https://localhost:3000"
+}
+```
+Set `serviceUrl` to your live service address when you go live.
+
 ## Google Cloud Console (one time)
 1. APIs & Services -> Credentials -> **Create OAuth client ID -> Web application**.
 2. **Authorized redirect URI:** `<service base URL>/oidc/callback`. Reference setup: `https://localhost:3000/oidc/callback`. Live: your real service address.

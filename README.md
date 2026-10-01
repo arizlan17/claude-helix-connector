@@ -13,11 +13,12 @@ Lets Claude Code work with Perforce Helix Core (read, edit, shelve, submit on re
 ### Developer
 ```powershell
 # 1. Connect this PC and a workspace folder (opens Google sign-in)
-.\scripts\onboard.ps1 -User jsmith -Root D:\work\mds
+.\scripts\onboard.ps1 -User jsmith -Root D:\work\mds -GoogleEmail john.smith@mitrai.com
 
 # 2. Check everything
 .\scripts\check.ps1 -Root D:\work\mds
 ```
+Google SSO through the Helix Authentication Service is **required**. `onboard.ps1` asks for the Google account email you will sign in with (or takes it from `-GoogleEmail`), confirms the Authentication Service in `connector.config.json` (`auth.serviceUrl`) is reachable, and after login checks that the email matches your Perforce user. If the service is down, onboarding stops before anything is written. Details: [docs/03](docs/03-google-sso-helix-auth.md).
 Then open the workspace folder in Claude Code, approve `perforce-p4-mcp`, and run `/helix-status`.
 
 ### Install the Claude Code plugin (skills, agents, command)
@@ -32,7 +33,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 ## Contents
 | Path | What |
 |---|---|
-| `connector.config.json` | Server address, pinned fingerprint, depot layout, MCP download. Change this to point the kit at your live server |
+| `connector.config.json` | Server address, pinned fingerprint, depot layout, Authentication Service URL (`auth`), MCP download. Change this to point the kit at your live server |
 | `scripts/onboard.ps1` | Developer onboarding |
 | `scripts/check.ps1` | Developer health check (changes nothing) |
 | `scripts/add-developer.ps1` | Admin: add a person |
