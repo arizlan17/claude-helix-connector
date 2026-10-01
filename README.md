@@ -59,4 +59,4 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 - The server certificate is pinned by fingerprint during onboarding.
 
 ## Tested
-`onboard.ps1` (including refusal of a wrong fingerprint), `check.ps1`, Not yet tested end to end: Claude Code calling the MCP tools (needs a session restart), and `/plugin install` from a marketplace.
+`onboard.ps1` (including refusal of a wrong fingerprint), `check.ps1`. Not yet tested end to end: Claude Code calling the MCP tools (needs a session restart), and `/plugin install` from a marketplace.
