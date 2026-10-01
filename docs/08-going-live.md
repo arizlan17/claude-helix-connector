@@ -1,8 +1,8 @@
-# 08 - From PoC to production
+# 08 - Going live
 
-Everything below is a shortcut taken in the PoC and what replaces it in live.
+Everything below compares the single-machine reference setup with what a live deployment uses.
 
-| Area | PoC | Live |
+| Area | Reference setup | Live |
 |---|---|---|
 | Helix Core | Background process, `localhost`, own data folder | Existing server or a service (systemd / Windows service), stable DNS name |
 | TLS on Helix | Self-generated certificate | Certificate from your company CA; publish the fingerprint to developers |

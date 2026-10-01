@@ -91,7 +91,7 @@ Useful options: `--readonly` (client-side read-only), `--toolsets a b c` (limit 
 - **Why:** Attach jobs to changelists where jobs are used.
 
 ## Tools that exist but are disabled by our policy
-| Toolset | Why off in the PoC |
+| Toolset | Why off by default |
 |---|---|
 | `streams` (`query_streams`, `modify_streams`) | This depot uses classic paths, not streams. Enable if you adopt streams. |
 | `reviews` (`query_reviews`, `modify_reviews`) | Needs a Swarm/P4 Code Review server. Enable when connected. |

@@ -43,6 +43,18 @@ function Invoke-P4([string]$P4, [string]$Port, [string]$User, [string[]]$P4Args)
     try { & $P4 -p $Port -u $User @P4Args 2>&1 | ForEach-Object { "$_" } } finally { $ErrorActionPreference = $old }
 }
 
+# TCP-level reachability check for the Helix Authentication Service (avoids TLS trust prompts on its cert).
+function Test-HelixAuthService([string]$Url) {
+    try {
+        $u = [Uri]$Url
+        $c = New-Object Net.Sockets.TcpClient
+        $iar = $c.BeginConnect($u.Host, $u.Port, $null, $null)
+        $ok = $iar.AsyncWaitHandle.WaitOne(3000) -and $c.Connected
+        $c.Close()
+        return [bool]$ok
+    } catch { return $false }
+}
+
 function Write-Step([string]$Text) { Write-Host "==> $Text" -ForegroundColor Cyan }
 function Write-Ok([string]$Text)   { Write-Host "    OK  $Text" -ForegroundColor Green }
 function Write-Warn2([string]$Text){ Write-Host "    !!  $Text" -ForegroundColor Yellow }

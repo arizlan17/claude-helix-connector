@@ -29,4 +29,4 @@ Run the health check first: `scripts\check.ps1 -Root <workspace folder>`.
 - Turn `security` down or `dm.user.noautocreate` off to "make it work".
 - Trust a changed certificate fingerprint without confirming it out of band.
 
-Next: [08 - From PoC to production](08-poc-to-production.md)
+Next: [08 - Going live](08-going-live.md)
