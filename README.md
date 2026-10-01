@@ -1,6 +1,6 @@
 # Claude + Helix Core connector kit
 
-Lets Claude Code work with Perforce Helix Core (read, edit, shelve, submit on request) with **Google SSO** through Helix Authentication. Version 0.1.0 (PoC).
+Lets Claude Code work with Perforce Helix Core (read, edit, shelve, submit on request) with **Google SSO** through Helix Authentication. Version 0.1.0.
 
 ## Quick start
 
@@ -32,7 +32,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 ## Contents
 | Path | What |
 |---|---|
-| `connector.config.json` | Server address, pinned fingerprint, depot layout, MCP download. Change this to move from PoC to live |
+| `connector.config.json` | Server address, pinned fingerprint, depot layout, MCP download. Change this to point the kit at your live server |
 | `scripts/onboard.ps1` | Developer onboarding |
 | `scripts/check.ps1` | Developer health check (changes nothing) |
 | `scripts/add-developer.ps1` | Admin: add a person |
@@ -50,7 +50,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 5. [Using Claude Code day to day](docs/05-claude-code-workflow.md)
 6. [Admin operations](docs/06-admin-operations.md)
 7. [Troubleshooting](docs/07-troubleshooting.md)
-8. [From PoC to production](docs/08-poc-to-production.md)
+8. [Going live](docs/08-going-live.md)
 
 ## Rules baked in
 - Perforce only, never git. Prefer MCP tools.
@@ -59,5 +59,5 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 - No passwords or tickets in files, chat, or the depot.
 - The server certificate is pinned by fingerprint during onboarding.
 
-## Tested in the PoC
+## Tested
 `onboard.ps1` (including refusal of a wrong fingerprint), `check.ps1`, `add-developer.ps1` (idempotent, duplicate-email refusal), `set-mcp-policy.ps1` (Show / ReadOnly / Reset). Not yet tested end to end: Claude Code calling the MCP tools (needs a session restart), and `/plugin install` from a marketplace.

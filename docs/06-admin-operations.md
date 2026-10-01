@@ -40,7 +40,7 @@ Developers cannot write `main`. A release manager (group `mds-release`) reviews 
 | `p4admin` password | `p4 passwd` as `p4admin` |
 
 ## Backups (required for live)
-Not configured in the PoC. For live: nightly checkpoint (`p4d -jc`), journal rotation, and copy of the depot files and the extension data directory off the server. Test a restore.
+Not configured in the reference setup. For live: nightly checkpoint (`p4d -jc`), journal rotation, and copy of the depot files and the extension data directory off the server. Test a restore.
 
 ## Upgrades
 Upgrade `p4d`, the Authentication Service and Extension together (they share a release train, for example 2026.1). After upgrading: restart, run `p4 extension --run loginhook-a1 test-all`, log in as a test user.

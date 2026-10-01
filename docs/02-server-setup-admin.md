@@ -1,6 +1,6 @@
 # 02 - Server setup (admin)
 
-These steps are how the PoC server was built on a single machine (paths such as `D:\helix` are the PoC's). The build scripts are kept with the PoC and are not part of this repository. In live, your existing Helix Core replaces steps 1-2; steps 3-5 still apply.
+These steps describe the reference server built on a single machine (paths such as `D:\helix` are from that setup). The build scripts are kept with it and are not part of this repository. In live, your existing Helix Core replaces steps 1-2; steps 3-5 still apply.
 
 ## Step 1 - Create and harden the server (`01-bootstrap-server.ps1`)
 | Action | Why |
@@ -46,7 +46,7 @@ p4 extension --run loginhook-a1 test-all
 ```
 Expected: `Request start: OK`, `Request status: OK`, `Command invoke: OK`.
 
-## Starting and stopping the PoC
+## Starting and stopping the reference server
 `D:\helix\scripts\start-all.ps1` starts `p4d` and the Authentication Service. In live run both as services (Windows service or systemd) so they survive reboots.
 
 Next: [03 - Google SSO](03-google-sso-helix-auth.md)
