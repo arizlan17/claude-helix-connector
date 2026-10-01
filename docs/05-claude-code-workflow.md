@@ -1,7 +1,7 @@
 # 05 - Using Claude Code with Helix Core, day to day
 
 ## One-time setup (developer)
-1. Ask an admin to add you (they run `add-developer.ps1` with your Google email).
+1. Ask your Helix admin to add you with your Google email as your Perforce user's Email.
 2. Run `scripts\onboard.ps1 -User <your.user> -Root <your workspace folder>`. It pins the server fingerprint, writes `.p4config`, `.mcp.json`, `CLAUDE.md`, opens Google sign-in, creates your workspace and syncs.
 3. Install the Claude Code plugin from the kit (see README), then open the workspace folder in Claude Code.
 4. Approve the `perforce-p4-mcp` server when asked.
@@ -56,4 +56,4 @@ Sign in with the Google account registered for your Perforce user.
 - Use `p4-reader` for questions when you want a hard guarantee that nothing changes.
 - Ask for `p4-changelog` before a standup: "Summarise the last week on main for standup."
 
-Next: [06 - Admin operations](06-admin-operations.md)
+Next: [07 - Troubleshooting](07-troubleshooting.md)

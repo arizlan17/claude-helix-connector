@@ -28,5 +28,3 @@ Run the health check first: `scripts\check.ps1 -Root <workspace folder>`.
 - Paste a password, ticket, or Google secret into chat, tickets, or the depot.
 - Turn `security` down or `dm.user.noautocreate` off to "make it work".
 - Trust a changed certificate fingerprint without confirming it out of band.
-
-Next: [08 - Going live](08-going-live.md)

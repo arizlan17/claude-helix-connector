@@ -102,18 +102,8 @@ The server allowlist is set with:
 p4 property -a -n mcp.toolsets.allowed -v server,changelists,files,shelves,workspaces,jobs
 ```
 
-## Governance: controlling MCP from the server
-All from an admin session, no change on developer PCs. The wrapper script is `scripts/set-mcp-policy.ps1`.
-
-| Goal | Command |
-|---|---|
-| Show settings | `set-mcp-policy.ps1 -Show` |
-| Make a group read-only | `set-mcp-policy.ps1 -Mode ReadOnly -Group mds-interns` (blocks every `modify_*` tool) |
-| Turn MCP off for one person | `set-mcp-policy.ps1 -Mode Off -TargetUser jsmith` |
-| Remove a group/user override | `set-mcp-policy.ps1 -Mode Reset -Group mds-interns` |
-| Global kill switch | `p4 property -a -n mcp.enabled -v false` (undo with `p4 property -d -n mcp.enabled`) |
-
-Precedence: highest sequence number wins; at equal sequence a **user** setting beats a **group** setting, which beats **global**. Only the literal value `false` blocks.
+## Governance
+An admin controls MCP from the server (read-only, off per person, or a global kill switch). This needs no change on your PC. If a tool says it is blocked, an admin policy applies; ask your Helix admin.
 
 ## Logs and troubleshooting
 - MCP logs: the `--log-dir` folder.

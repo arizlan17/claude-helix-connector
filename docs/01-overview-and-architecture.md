@@ -51,10 +51,8 @@ Claude Code -> P4 MCP server (local process) -> reads the ticket -> Helix Core. 
 |---|---|
 | `plugins/helix-connector/` | Claude Code plugin: MCP config, skills, agents, `/helix-status` command |
 | `scripts/onboard.ps1` | Developer: connect a PC and workspace |
-| `scripts/add-developer.ps1` | Admin: add a person |
-| `scripts/set-mcp-policy.ps1` | Admin: control MCP capability |
 | `scripts/check.ps1` | Developer: health check |
 | `templates/`, `connector.config.json` | Files the scripts generate from; one place to point at a server |
 | `docs/` | These guides |
 
-Next: [02 - Server setup](02-server-setup-admin.md)
+Next: [03 - Google SSO](03-google-sso-helix-auth.md)
