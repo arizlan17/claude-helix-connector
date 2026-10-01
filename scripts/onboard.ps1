@@ -16,6 +16,7 @@ param(
     [Parameter(Mandatory)][string]$User,            # your Perforce user name (admin gave it to you)
     [Parameter(Mandatory)][string]$Root,            # workspace folder to create/use
     [string]$Workspace,                             # defaults to <user>-mds
+    [string]$GoogleEmail,                           # Google account email registered on your Perforce user (asked if omitted)
     [string]$P4Path,                                # explicit path to p4.exe if not on PATH
     [switch]$InstallMcp,                            # download the P4 MCP server without asking
     [switch]$SkipLogin,                             # for automation/tests: do not run p4 login
@@ -57,6 +58,22 @@ if (-not $mcp) {
 Write-Ok "MCP server: $mcp"
 [Environment]::SetEnvironmentVariable('P4MCP_BIN', $mcp, 'User')   # used by the Claude Code plugin
 
+Write-Step 'Google SSO via Helix Authentication Service (required)'
+Write-Host "    Sign-in uses $($cfg.auth.service) with Google as the OIDC provider. There is no password login."
+Write-Host '    Your Google account email must exactly match the Email on your Perforce user (ask your Helix admin).'
+if (-not $GoogleEmail -and -not $SkipLogin) {
+    $GoogleEmail = Read-Host '    Google account email you will sign in with'
+}
+if (-not $SkipLogin -and $GoogleEmail -notmatch '^[^@\s]+@[^@\s]+\.[^@\s]+$') {
+    Write-Bad 'A valid Google account email is required for SSO sign-in.'; exit 1
+}
+if (Test-HelixAuthService $cfg.auth.serviceUrl) { Write-Ok "Authentication service reachable: $($cfg.auth.serviceUrl)" }
+else {
+    Write-Bad "Cannot reach $($cfg.auth.serviceUrl). Google sign-in will fail until the Helix Authentication Service is running."
+    Write-Host '    Check with your Helix admin (see docs/03-google-sso-helix-auth.md), then re-run.'
+    exit 1
+}
+
 Write-Step "Pinning Helix server certificate for $($cfg.p4port)"
 if ($cfg.p4port -like 'ssl:*') {
     if (-not $cfg.serverFingerprint) { throw 'connector.config.json has no serverFingerprint. Get it from your Helix admin.' }
@@ -96,6 +113,9 @@ try {
     & $p4 login
     if ($LASTEXITCODE -ne 0) { Write-Bad 'Login failed. Use the Google account whose email is registered for your Perforce user.'; exit 1 }
     Write-Ok ((Invoke-P4 $p4 $cfg.p4port $User @('login', '-s')) -join ' ')
+    $reg = ((Invoke-P4 $p4 $cfg.p4port $User @('user', '-o', $User)) | Where-Object { $_ -match '^Email:' }) -replace '^Email:\s*', ''
+    if ($reg -and $reg.Trim() -ieq $GoogleEmail.Trim()) { Write-Ok "Google identity matches Perforce user email ($reg)" }
+    else { Write-Warn2 "Perforce user email is '$reg' but you entered '$GoogleEmail'. Ask your admin to align them." }
 
     Write-Step "Creating workspace $Workspace"
     $exists = Invoke-P4 $p4 $cfg.p4port $User @('clients', '-e', $Workspace)

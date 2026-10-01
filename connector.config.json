@@ -5,6 +5,11 @@
   "depotRoot": "//mds/springbatch-demo",
   "lines": ["main", "dev", "features"],
   "defaultGroup": "mds-developers",
+  "auth": {
+    "method": "google-oidc",
+    "service": "Helix Authentication Service",
+    "serviceUrl": "https://localhost:3000"
+  },
   "p4mcp": {
     "version": "v2026.4.3078076",
     "winZipUrl": "https://github.com/perforce/p4mcp-server/releases/download/v2026.4.3078076/p4-mcp-server-win.zip"
