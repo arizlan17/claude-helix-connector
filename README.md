@@ -68,6 +68,11 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 7. [Troubleshooting](docs/07-troubleshooting.md)
 8. [Going live](docs/08-going-live.md)
 
+**Already have a Perforce user and workspace?** Start at [docs/existing-workspace/](docs/existing-workspace/README.md):
+- [Complete guide](docs/existing-workspace/03-complete-guide.md)
+- [System boundary and integration diagrams](docs/existing-workspace/01-system-boundary-and-integration.md)
+- [Skills, agents, commands and hook: what, why, how, order](docs/existing-workspace/02-skills-and-agents-guide.md)
+
 ## Rules baked in
 - Perforce only, never git. Prefer MCP tools.
 - Developers write `dev/` and `features/`, read `main`.
