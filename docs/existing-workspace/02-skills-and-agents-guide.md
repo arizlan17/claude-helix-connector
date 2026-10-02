@@ -6,10 +6,13 @@ Everything here ships in the `helix-connector` plugin. **Skills** are instructio
 
 ```mermaid
 flowchart TB
-    S0["0. Setup once<br/>onboard.ps1 -ExistingWorkspace"] --> S1["1. Restart Claude Code in the workspace<br/>approve perforce-p4-mcp"]
-    S1 --> S2["2. /helix-status<br/>check connection"]
-    S2 --> S3["3. /helix-init<br/>skill p4-first-run + agent p4-discoverer"]
-    S3 --> S4["4. /helix-learn<br/>skill p4-codebase-learn + agent p4-codebase-analyst"]
+    P0["A. Install the plugin<br/>/plugin marketplace add + install"] --> P1["B. Open the workspace folder<br/>in Claude Code"]
+    P1 --> P2["C. Sign in yourself<br/>! p4 login (Google)"]
+    P2 --> S0["D. /helix-connect<br/>skill p4-connect + connect.ps1"]
+    S0 --> S1["E. Restart Claude Code once<br/>approve perforce-p4-mcp"]
+    S1 --> S2["F. /helix-status<br/>check connection"]
+    S2 --> S3["G. /helix-init<br/>skill p4-first-run + agent p4-discoverer"]
+    S3 --> S4["H. /helix-learn<br/>skill p4-codebase-learn + agent p4-codebase-analyst"]
     S4 --> LOOP
 
     subgraph LOOP["Every task"]
@@ -27,24 +30,35 @@ flowchart TB
 
 | Step | Do | Why it comes here |
 |---|---|---|
-| 0 | `onboard.ps1 -ExistingWorkspace ...` | Connects Claude to your existing user and workspace without changing them |
-| 1 | Restart Claude Code in the workspace folder, approve `perforce-p4-mcp` | MCP tools only load at session start |
-| 2 | `/helix-status` | Proves the connection and login work before anything else |
-| 3 | `/helix-init` | Learns what the live server lets **you** do, so later rules match reality |
-| 4 | `/helix-learn` | Learns the code before writing code, so new code reuses existing methods |
-| 5 | Per task: implement, guard, review, shelve, submit | Safe path from edit to server |
+| A | `/plugin marketplace add ...` then `/plugin install helix-connector@mds-helix` | Gives you the commands, skills, agents and hook. Nothing else to clone |
+| B | Open the workspace folder (the workspace Root) in Claude Code | `/helix-connect` works on the current folder and finds your workspace from it |
+| C | `! p4 login` (only if not already signed in) | Claude never logs in for you; doing it first avoids a stop-and-retry |
+| D | `/helix-connect` | Detects your user, server and workspace, checks trust, login and that you are not admin, writes the missing config files |
+| E | Restart Claude Code in the folder, approve `perforce-p4-mcp` | The Perforce tools load only at session start (needed the first time) |
+| F | `/helix-status` | Proves the connection works before anything else |
+| G | `/helix-init` | Learns what the live server lets **you** do, so later rules match reality |
+| H | `/helix-learn` | Learns the code before writing code, so new code reuses existing methods |
+| then | Per task: implement, guard, review, shelve, submit | Safe path from edit to server |
 
-Run steps 3 and 4 once per workspace, then again when the server rules or the code have changed a lot.
+Run G and H once per workspace, then again when the server rules or the code have changed a lot. If you prefer a script to `/helix-connect`, run `onboard.ps1 -ExistingWorkspace` from a clone of the kit in place of step D; everything else is the same.
 
 ## 2. Commands (you type these)
 
 | Command | What it does | Use it when |
 |---|---|---|
+| `/helix-connect` | Runs `p4-connect`: detects your user, server and workspace, checks trust, login and that you are not admin, and writes the missing config files | Once per workspace, right after installing the plugin |
 | `/helix-status` | Shows your user, server, workspace, ticket state and pending changes | First thing in a session, or when something looks wrong |
 | `/helix-init` | Runs `p4-first-run`: reads the live server's rules and proposes updates to `CLAUDE.md`, `.claude/settings.json`, `.p4config`, `.p4ignore` | Once after onboarding, and after your permissions change |
 | `/helix-learn` | Runs `p4-codebase-learn`: studies the code and saves `CODEBASE_NOTES.md` | Once after `/helix-init`, before building features in an unfamiliar area |
 
 ## 3. Skills (Claude applies these on its own, or you ask)
+
+### p4-connect
+- **What:** Runs the plugin's `connect.ps1` for the current folder. It detects your Perforce user, server and workspace (from `p4 set`, an existing `.p4config`, or by matching the folder to your workspace Root), checks the server is trusted and you are signed in, refuses `admin`/`super` accounts, and writes only the missing `.p4config`, `.p4ignore`, `CLAUDE.md` and `.claude/settings.json`.
+- **Why:** The developer does not clone the kit or run a script, and Claude asks only for what it cannot detect.
+- **How:** Open the workspace folder, run `! p4 login` if needed, then type `/helix-connect`. It may ask for the server, user or workspace, and whether to download the P4 MCP server. Restart Claude Code once if it tells you to.
+- **Never:** logs in for you, trusts a certificate for you, overwrites a file, or changes the server.
+- **If it stops:** not signed in, run `! p4 login`. Certificate not trusted, confirm the fingerprint with your admin and run `p4 trust`. Admin account, use a normal one.
 
 ### p4-first-run
 - **What:** Discovers your access level, groups, workspace view, layout and MCP policy (read-only), then proposes file changes and writes them only after you approve.

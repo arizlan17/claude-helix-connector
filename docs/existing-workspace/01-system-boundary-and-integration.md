@@ -1,6 +1,6 @@
 # 01 - System boundary and integration diagrams
 
-Applies to the **existing workspace** setup (`onboard.ps1 -ExistingWorkspace`): you already have a Perforce user and workspace, and sign in with Google SSO. Diagrams are Mermaid, so GitHub renders them.
+Applies to the **existing workspace** setup (`/helix-connect`, or `onboard.ps1 -ExistingWorkspace`): you already have a Perforce user and workspace, and sign in with Google SSO. Diagrams are Mermaid, so GitHub renders them.
 
 ## 1. System boundary
 
@@ -14,7 +14,7 @@ flowchart TB
         BR["Browser<br/>Google sign-in only"]
         subgraph CC["Claude Code"]
             direction TB
-            PLUG["helix-connector plugin<br/>6 skills, 7 agents, 3 commands"]
+            PLUG["helix-connector plugin<br/>7 skills, 7 agents, 4 commands"]
             HOOK["p4-guard hook<br/>blocks rule/permission edits"]
         end
         MCP["P4 MCP server<br/>(p4-mcp-server.exe)"]
@@ -60,6 +60,48 @@ Boundaries to know about:
 | Claude to Helix Core | Read, edit, shelve, submit as the signed-in user | Server permissions, MCP policy, `p4-guard` hook (see section 3) |
 
 ## 2. Integration: how the pieces work together
+
+### 2.0 Connect (done by `/helix-connect`)
+
+Runs once per workspace, after the plugin is installed. No clone and no manual script.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant CC as Claude Code + p4-connect skill
+    participant CS as connect.ps1 (inside the plugin)
+    participant P4D as Helix Core
+    participant WS as Workspace files
+    participant ENV as User environment
+
+    Dev->>Dev: p4 login (Google sign-in, if not signed in)
+    Dev->>CC: /helix-connect
+    CC->>CS: run in the workspace folder
+    CS->>CS: find p4 and the P4 MCP server
+    opt MCP server missing
+        CS-->>CC: need consent to download
+        CC->>Dev: download the P4 MCP server?
+        Dev-->>CC: yes
+        CC->>CS: run again with -InstallMcp
+    end
+    CS->>CS: detect user, server, workspace (p4 set, .p4config, folder match)
+    opt something cannot be detected
+        CS-->>CC: NEED server / user / workspace
+        CC->>Dev: ask only for the missing item
+        Dev-->>CC: answer
+        CC->>CS: run again with the answer
+    end
+    CS->>P4D: info (trusted?), login -s (signed in?)
+    CS->>P4D: protects -m (not admin or super?)
+    P4D-->>CS: access level
+    CS->>WS: write only missing files
+    CS->>ENV: set P4MCP_BIN if needed
+    CS-->>CC: done
+    CC-->>Dev: restart Claude Code once, approve perforce-p4-mcp, then /helix-status
+```
+
+If the certificate is not trusted, the script stops and you run `p4 trust` yourself after confirming the fingerprint with your admin. If an admin or super account is detected, it stops unless you explicitly accept the risk.
 
 ### 2.1 Sign-in (done by you, not Claude)
 
@@ -155,11 +197,16 @@ Layers 1 and 2 inspect command text, so they are safety nets. Layer 4 is the gua
 
 ```mermaid
 flowchart LR
-    ONB["onboard.ps1 -ExistingWorkspace"] --> A[".p4config<br/>server, user, workspace"]
-    ONB --> B[".p4ignore"]
-    ONB --> C[".mcp.json<br/>MCP server + log dir"]
-    ONB --> D["CLAUDE.md<br/>generic Perforce rules"]
-    ONB --> E[".claude/hooks/p4-guard.ps1<br/>.claude/settings.json"]
+    CONN["/helix-connect<br/>connect.ps1 in the plugin"] --> A[".p4config<br/>server, user, workspace"]
+    CONN --> B[".p4ignore"]
+    CONN --> D["CLAUDE.md<br/>generic Perforce rules"]
+    CONN --> E[".claude/settings.json<br/>deny rules"]
+    PLG["Plugin itself"] --> M["perforce-p4-mcp server config<br/>and the p4-guard hook"]
+    SCR["Alternative: onboard.ps1<br/>-ExistingWorkspace"] --> A
+    SCR --> B
+    SCR --> D
+    SCR --> E
+    SCR --> M2[".mcp.json and<br/>.claude/hooks/p4-guard.ps1"]
     INIT["/helix-init"] -. "merges" .-> D
     INIT -. "merges" .-> E
     INIT -. "adds missing keys" .-> A
@@ -168,6 +215,6 @@ flowchart LR
     LEARN -. "adds one line" .-> D
 ```
 
-Solid arrows create a file; dotted arrows merge into one that exists. Existing files are never overwritten.
+Solid arrows create a file; dotted arrows merge into one that exists. Existing files are never overwritten. With the plugin path (`/helix-connect`) the MCP server config and the guard hook come from the plugin, so no `.mcp.json` is written into the workspace.
 
 Next: [02 - Skills and agents guide](02-skills-and-agents-guide.md)

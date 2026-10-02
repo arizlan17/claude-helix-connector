@@ -6,14 +6,61 @@ One page covering the whole setup for a developer who **already has a Perforce u
 
 | Part | What it gives you |
 |---|---|
-| Plugin `helix-connector` | 6 skills, 7 agents, 3 commands (`/helix-status`, `/helix-init`, `/helix-learn`) |
+| Plugin `helix-connector` | 7 skills, 7 agents, 4 commands (`/helix-connect`, `/helix-status`, `/helix-init`, `/helix-learn`) |
 | P4 MCP server | Claude's tools for Perforce (query, edit, shelve, submit) |
-| Workspace files | `.p4config`, `.p4ignore`, `.mcp.json`, `CLAUDE.md`, `.claude/settings.json`, `.claude/hooks/p4-guard.ps1`, later `CODEBASE_NOTES.md` |
+| Workspace files | `.p4config`, `.p4ignore`, `CLAUDE.md`, `.claude/settings.json`, later `CODEBASE_NOTES.md` |
 | Guard hook | Claude can read server rules and permissions but cannot edit or delete them |
 
 Claude acts **as you**, with your permissions and your login. It never signs in for you and never sees your password.
 
-## 2. Big picture
+## 2. Order of connecting
+
+```mermaid
+flowchart TB
+    A["1. Install the plugin"] --> B["2. Open your workspace folder<br/>in Claude Code"]
+    B --> C["3. Sign in yourself if needed<br/>! p4 login"]
+    C --> D["4. /helix-connect<br/>answer only what it asks"]
+    D --> E["5. Restart Claude Code once<br/>approve perforce-p4-mcp"]
+    E --> F["6. /helix-status"]
+    F --> G["7. /helix-init<br/>learn the server rules"]
+    G --> H["8. /helix-learn<br/>learn the code"]
+    H --> I["9. Work:<br/>code, guard, review, shelve, submit on request"]
+```
+
+| # | Do | Details |
+|---|---|---|
+| 1 | Install the plugin | `/plugin marketplace add <path-or-git-url>` then `/plugin install helix-connector@mds-helix`. No clone of the kit is needed beyond the marketplace source |
+| 2 | Open your workspace folder | Open the folder that is your workspace Root. `/helix-connect` works on the current folder |
+| 3 | `! p4 login` | Only if not signed in. Google opens in the browser. Claude never does this for you |
+| 4 | `/helix-connect` | Detects your user, server and workspace; checks trust, login, and that you are not admin; writes the missing files. It may ask for the server, user or workspace, and whether to download the P4 MCP server |
+| 5 | Restart Claude Code, approve `perforce-p4-mcp` | The Perforce tools load only at session start. Needed the first time (and after `P4MCP_BIN` is set) |
+| 6 | `/helix-status` | Shows your user, workspace and pending changes |
+| 7 | `/helix-init` | Reads the live server's rules for **your** user and proposes updates to `CLAUDE.md`, `.claude/settings.json`, `.p4config`, `.p4ignore`. Nothing is written until you approve |
+| 8 | `/helix-learn` | Pick a scope; saves `CODEBASE_NOTES.md` after you approve |
+| 9 | Work | See section 5 |
+
+Steps 1 to 8 happen once per workspace. Re-run 7 and 8 when the server rules or the code change a lot.
+
+### Alternative: connect with a script
+If you prefer a script to `/helix-connect`, clone the kit and run, in place of step 4:
+```powershell
+.\scripts\onboard.ps1 -ExistingWorkspace -User <your.user> -Workspace <existing workspace> -P4Port ssl:helix.company.com:1666
+```
+It does the same checks, but also writes `.mcp.json` and copies the guard hook into the workspace. Options: `-Root`, `-InstallMcp`, `-SkipLogin`, `-AllowAdminAccount`, `-P4Path`. Everything else (steps 5 to 9) is the same.
+
+## 3. Before you start
+
+| Item | Where from |
+|---|---|
+| Perforce user whose **Email** equals your Google account, and an existing **workspace** | Your Helix admin / you already have it |
+| A **normal** account, not `admin` or `super` | `/helix-connect` and `onboard.ps1` refuse admin accounts unless you explicitly accept the risk |
+| Server certificate already trusted (`p4 trust`) | You, after confirming the fingerprint with your admin. `/helix-connect` never trusts it for you |
+| Windows 10/11, PowerShell, the `p4` command line client, Claude Code | Install yourself |
+| The P4 MCP server | `/helix-connect` offers to download it (only if you say yes), or set `P4MCP_BIN` to your company's approved copy |
+
+An admin can pre-set the server address for everyone in `plugins/helix-connector/connect/connect.config.json` before sharing the plugin, so developers never type it.
+
+## 4. Big picture
 
 ```mermaid
 flowchart LR
@@ -31,68 +78,7 @@ flowchart LR
     CC <--> ANTH["Claude model service"]
 ```
 
-Full boundary and sequence diagrams: [01](01-system-boundary-and-integration.md).
-
-## 3. Before you start
-
-You need:
-
-| Item | Where from |
-|---|---|
-| Perforce user whose **Email** equals your Google account, and an existing **workspace** | Your Helix admin / you already have it |
-| A **normal** account, not `admin` or `super` | Onboarding refuses admin accounts unless `-AllowAdminAccount` |
-| Server address, e.g. `ssl:helix.company.com:1666` | Your admin |
-| Server certificate already trusted (`p4 trust`) | You, after confirming the fingerprint with your admin |
-| Windows 10/11, PowerShell, the `p4` command line client, Claude Code | Install yourself |
-| This repo cloned (branch `feat/existing-workspace-mode`) | `git clone` |
-
-The P4 MCP server is found automatically; if it is missing, `onboard.ps1` offers to download it (or use `-InstallMcp`, or set `P4MCP_BIN` to your company's approved copy).
-
-## 4. Setup, step by step
-
-### Step 1: connect (once)
-```powershell
-.\scripts\onboard.ps1 -ExistingWorkspace -User <your.user> -Workspace <existing workspace> -P4Port ssl:helix.company.com:1666
-```
-
-| Option | Meaning |
-|---|---|
-| `-ExistingWorkspace` | Use your workspace; do not create or sync anything |
-| `-User` | Your Perforce user |
-| `-Workspace` | Exact name of your existing workspace |
-| `-P4Port` | Server address (defaults to `p4port` in `connector.config.json`) |
-| `-Root` | Workspace folder. Optional: taken from the workspace's Root |
-| `-InstallMcp` | Download the MCP server without asking |
-| `-SkipLogin` | Do not run `p4 login` (for automation) |
-| `-AllowAdminAccount` | Proceed with an admin/super account (not recommended) |
-| `-P4Path` | Path to `p4.exe` if not on PATH |
-
-What it does, in order: finds `p4` and the MCP server, checks the server is reachable and trusted, checks you are signed in (runs `p4 login` only if the ticket expired), **refuses admin/super accounts**, confirms the workspace exists, then writes any missing files and installs the guard hook. It never overwrites an existing file.
-
-### Step 2: restart Claude Code
-Open the workspace folder in Claude Code (a fresh session) and approve the `perforce-p4-mcp` server when asked. Install the plugin if you have not:
-```
-/plugin marketplace add <path-or-git-url-of-this-repo>
-/plugin install helix-connector@mds-helix
-```
-
-### Step 3: check the connection
-```
-/helix-status
-```
-You should see your user, workspace and any pending changes. If not, see section 7.
-
-### Step 4: learn the server rules (once)
-```
-/helix-init
-```
-`p4-discoverer` reads your access level, groups, layout and MCP policy (read only). Review the proposed changes to `CLAUDE.md`, `.claude/settings.json`, `.p4config` and `.p4ignore`, then approve. Restart Claude Code if `.claude/settings.json` changed.
-
-### Step 5: learn the code (once, refresh later)
-```
-/helix-learn
-```
-Pick a scope. `p4-codebase-analyst` reports the stack, domain terms, conventions, best practices and reusable methods. Review the draft and approve; it saves `CODEBASE_NOTES.md`.
+Full boundary and sequence diagrams (including the connect sequence): [01](01-system-boundary-and-integration.md).
 
 ## 5. Daily workflow
 
@@ -126,7 +112,7 @@ Rules Claude follows: Perforce only (no git); `edit` before changing a file; num
 | Layer | Protects against | Strength |
 |---|---|---|
 | Helix protections for **your** user | Anything your account is not allowed to do | **Guarantee** (server enforced) |
-| Onboarding refuses admin/super | Claude running with rule-changing power | Strong |
+| Connect refuses admin/super | Claude running with rule-changing power | Strong |
 | MCP policy on the server | Write tools when your group is read-only | Strong |
 | `p4-guard` hook and deny rules | Claude editing or deleting protections, groups, users, properties | Safety net (reads command text) |
 | `p4-guard` agent | Secrets, `.p4config` or `main` in a change | Process check |
@@ -138,12 +124,15 @@ Server rules and permissions are read-only for Claude. Details: [docs/04](../04-
 
 | Symptom | Fix |
 |---|---|
-| "Login invalid" / expired | You run `p4 login` (Google opens). Claude never logs in for you |
-| Cannot reach server | VPN / address; confirm `-P4Port` |
-| Certificate not trusted / "IDENTIFICATION HAS CHANGED" | Confirm the fingerprint with your admin, then `p4 -p <server> trust`. Do not trust blindly |
-| Workspace not found | Check the name: `p4 clients -u <you>` |
-| "Refused: admin/super account" | Use a normal Perforce account for Claude |
-| Tools missing in Claude Code | Restart Claude Code in the workspace; approve `perforce-p4-mcp` |
+| `/helix-connect` says not signed in | Run `! p4 login`, then `/helix-connect` again |
+| `/helix-connect` says certificate not trusted | Confirm the fingerprint with your Helix admin, then `p4 -p <server> trust`, then again |
+| `/helix-connect` asks for server, user or workspace | Answer it; it could not detect that item from your Perforce settings |
+| "Several workspaces match this folder" | Tell it which one |
+| "No workspace has this folder as its Root" | Open Claude Code in the workspace folder, or give the workspace name |
+| Admin/super account refused | Use a normal Perforce account for Claude |
+| Perforce tools missing in Claude Code | Restart Claude Code in the workspace; approve `perforce-p4-mcp` |
+| "Login invalid" / expired later | You run `p4 login`. Claude never logs in for you |
+| Cannot reach server | VPN / address |
 | "Blocked by helix-connector" | The hook stopped a rule/permission change. Ask your Helix admin |
 | A tool says it is blocked | A server MCP policy applies; do not work around it |
 | Google sign-in fails | Google email must equal your Perforce Email exactly |
@@ -154,19 +143,20 @@ More: [07 Troubleshooting](../07-troubleshooting.md), and the `p4-troubleshoot` 
 
 | File | Created by | Purpose | In the depot? |
 |---|---|---|---|
-| `.p4config` | onboard, `/helix-init` | Server, user, workspace | No (ignored) |
-| `.p4ignore` | onboard, `/helix-init` | Files Perforce should skip | No |
-| `.mcp.json` | onboard | Starts the MCP server for this folder | No |
-| `CLAUDE.md` | onboard, `/helix-init`, `/helix-learn` | Rules Claude follows here | Your choice |
-| `.claude/settings.json` | onboard, `/helix-init` | Deny rules and the guard hook | Your choice |
-| `.claude/hooks/p4-guard.ps1` | onboard | Blocks rule/permission edits | Your choice |
+| `.p4config` | `/helix-connect`, `/helix-init` | Server, user, workspace | No (ignored) |
+| `.p4ignore` | `/helix-connect`, `/helix-init` | Files Perforce should skip | No |
+| `CLAUDE.md` | `/helix-connect`, `/helix-init`, `/helix-learn` | Rules Claude follows here | Your choice |
+| `.claude/settings.json` | `/helix-connect`, `/helix-init` | Deny rules | Your choice |
 | `CODEBASE_NOTES.md` | `/helix-learn` | Domain, conventions, reusable methods | Ignored by default |
+| `.mcp.json`, `.claude/hooks/p4-guard.ps1` | Script path only | MCP server start; guard hook | Your choice |
+
+With the plugin path the MCP server config and the guard hook come from the plugin itself.
 
 ## 9. Limits and what is verified
 
 - Windows only for now.
 - `p4-feature-line`, `p4-submitter` and the `p4-guard` agent assume a `main` / `dev` / `features` layout. If your project differs, `/helix-init` records the real writable folders in `CLAUDE.md`; tell Claude to follow those, or adjust the agent files.
 - No Swarm / code-review integration and no streams support.
-- Tested with a fake `p4` stand-in: the existing-workspace flow, admin refusal, and the guard hook (23 command cases). **Not yet tested:** against a real Helix server, Claude Code loading the hook and plugin, and the agents' restricted `Bash(p4 ...)` tool lists (they fall back to MCP tools and Read/Grep/Glob if not accepted).
+- Tested with a fake `p4` stand-in: `/helix-connect`'s script (missing info, untrusted, not signed in, admin refusal, full run, re-run, MCP missing), the existing-workspace script path, and the guard hook (23 command cases). **Not yet tested:** against a real Helix server, Claude Code loading the plugin, command and hook, the MCP download, and the agents' restricted `Bash(p4 ...)` tool lists (they fall back to MCP tools and Read/Grep/Glob if not accepted).
 
 Previous: [02 - Skills and agents guide](02-skills-and-agents-guide.md)

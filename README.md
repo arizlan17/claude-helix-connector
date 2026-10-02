@@ -31,6 +31,8 @@ Then open the workspace folder in Claude Code, approve `perforce-p4-mcp`, and ru
 ```
 It detects your Perforce user, server and workspace, checks your login, refuses admin accounts, and writes only the missing `.p4config`, `.p4ignore`, `CLAUDE.md` and `.claude/settings.json`. It asks you only for what it cannot detect, never logs in for you (you run `! p4 login`), never trusts a certificate for you, and offers to download the P4 MCP server only if you say yes. Admins can pre-set the server address in `plugins/helix-connector/connect/connect.config.json` before sharing the plugin.
 
+**Order:** install the plugin, open your workspace folder in Claude Code, `! p4 login` if needed, `/helix-connect`, restart Claude Code once and approve `perforce-p4-mcp`, then `/helix-status`, `/helix-init`, `/helix-learn`. Full order with diagrams: [docs/existing-workspace](docs/existing-workspace/README.md).
+
 **Alternative (script):** connect from the kit folder:
 Connect Claude to them without creating or syncing anything:
 ```powershell
