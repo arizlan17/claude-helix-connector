@@ -29,6 +29,7 @@ Helix Core is not Git. Depot files are **read-only on disk until opened**. Follo
 | Share work without submitting | `modify_shelves` `shelve` |
 
 ## Editing workflow
+0. If `CODEBASE_NOTES.md` exists, read it first. Reuse the methods in its "Reuse before you write" table and follow its conventions and glossary. If it does not exist and the area is unfamiliar, suggest `/helix-learn`.
 1. `sync` the paths you will touch.
 2. `edit` each file (or `add` new ones) into a **numbered** changelist with a clear description.
 3. Make the change; run the build and tests locally (`mvn verify` for the Java project).
