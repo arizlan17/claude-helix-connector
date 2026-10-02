@@ -41,6 +41,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 | `templates/` | `.p4config`, `.p4ignore`, `.mcp.json`, `CLAUDE.md` templates |
 | `plugins/helix-connector/` | Plugin: `.mcp.json`, 5 skills, 6 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`, `p4-discoverer`), `/helix-status`, `/helix-init` |
 | `.claude-plugin/marketplace.json` | Marketplace definition |
+| `plugins/helix-connector/` codebase learning | `p4-codebase-learn` skill, `p4-codebase-analyst` agent and `/helix-learn`: read the existing code (read-only) and save `CODEBASE_NOTES.md` with the domain, conventions, best practices and reusable methods |
 | `docs/` | Numbered guides |
 
 ## Documentation
