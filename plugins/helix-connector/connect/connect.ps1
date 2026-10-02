@@ -37,12 +37,12 @@ function P4 {   # run p4 quietly, return output lines (stderr merged, never thro
 function P4Conn([string[]]$a) { P4 -p $script:port -u $script:user @a }
 
 function Find-P4Exe([string]$Hint) {
-    $c = @($Hint, (Get-Command p4 -ErrorAction SilentlyContinue).Source, 'C:\Program Files\Perforce\p4.exe') | Where-Object { $_ }
+    $c = @(@($Hint, (Get-Command p4 -ErrorAction SilentlyContinue).Source, 'C:\Program Files\Perforce\p4.exe') | Where-Object { $_ })
     foreach ($x in $c) { if (Test-Path $x) { return (Resolve-Path $x).Path } }
     $null
 }
 function Find-Mcp {
-    $c = @($env:P4MCP_BIN, (Get-Command p4-mcp-server -ErrorAction SilentlyContinue).Source) | Where-Object { $_ }
+    $c = @(@($env:P4MCP_BIN, (Get-Command p4-mcp-server -ErrorAction SilentlyContinue).Source) | Where-Object { $_ })
     $dir = Join-Path $env:LOCALAPPDATA 'claude-helix\p4mcp'
     if (Test-Path $dir) { $c += (Get-ChildItem $dir -Recurse -Filter p4-mcp-server.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName) }
     foreach ($x in $c) { if ($x -and (Test-Path $x)) { return (Resolve-Path $x).Path } }
@@ -126,7 +126,8 @@ if ("$ticket" -notmatch 'ticket expires') {
 Ok 'signed in'
 
 # ---------------------------------------------------------------- 4. never run as admin
-$lvl = ((P4Conn @('protects', '-m', '-u', $script:user, '//...')) -join ' ').Trim() -split '\s+' | Select-Object -First 1
+$first = (((P4Conn @('protects', '-m', '//...')) -join ' ').Trim() -split '\s+' | Select-Object -First 1)
+$lvl = if ($first -match '^(list|read|open|write|review|owner|admin|super)$') { $first.ToLower() } else { $null }
 if ($lvl -in 'admin', 'super') {
     if (-not $AllowAdminAccount) {
         Bad "User '$($script:user)' has $lvl rights. Claude acts as this user and could change server rules."
@@ -135,6 +136,7 @@ if ($lvl -in 'admin', 'super') {
     }
     Warn "Continuing with an $lvl account (-AllowAdminAccount). The guard hook blocks rule changes, but the server will not."
 } elseif ($lvl) { Ok "access level: $lvl (cannot change server rules)" }
+else { Warn 'Could not determine your access level; continuing. Make sure this is not an admin account.' }
 
 # ---------------------------------------------------------------- 5. workspace
 Say '==>' "Finding your workspace"

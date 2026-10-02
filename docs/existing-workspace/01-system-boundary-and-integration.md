@@ -40,7 +40,7 @@ flowchart TB
     CC -->|"stdio tool calls"| MCP
     CC -->|"fallback commands"| CLI
     CC --> WS
-    HOOK -.->|"inspects every Bash command"| CLI
+    HOOK -.->|"inspects every Bash and PowerShell command"| CLI
     MCP -->|"P4 protocol over TLS"| P4D
     CLI -->|"P4 protocol over TLS"| P4D
     P4D --- EXT

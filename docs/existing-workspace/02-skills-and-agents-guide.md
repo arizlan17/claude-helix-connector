@@ -25,7 +25,7 @@ flowchart TB
     end
 
     LOOP -. "anytime" .-> X1["p4-reader: questions<br/>p4-changelog: standup<br/>p4-troubleshoot: errors"]
-    HOOK["p4-guard hook<br/>runs automatically on every Bash command"] -.-> LOOP
+    HOOK["p4-guard hook<br/>runs automatically on every Bash and PowerShell command"] -.-> LOOP
 ```
 
 | Step | Do | Why it comes here |
@@ -108,7 +108,7 @@ Run G and H once per workspace, then again when the server rules or the code hav
 
 ## 5. The p4-guard hook (automatic)
 
-- **What:** A `PreToolUse` hook that checks every Bash command Claude is about to run. It blocks commands that would edit or delete server rules and permissions, such as `p4 protect`, `p4 group -i/-d`, `p4 user -i/-d`, `p4 property -a/-d`, `p4 admin`, `p4 obliterate`, `p4 login`, `p4d`, and the admin scripts.
+- **What:** A `PreToolUse` hook that checks every Bash and PowerShell command Claude is about to run. It blocks commands that would edit or delete server rules and permissions, such as `p4 protect`, `p4 group -i/-d`, `p4 user -i/-d`, `p4 property -a/-d`, `p4 admin`, `p4 obliterate`, `p4 login`, `p4d`, and the admin scripts.
 - **Allows:** Reading rules, for example `p4 protects`, `p4 group -o`, `p4 property -l`.
 - **Why:** Claude can read the rules to follow them but must never change them.
 - **How:** Nothing to do. It ships in the plugin, and `onboard.ps1` also copies it to `.claude/hooks/`. If it blocks something, the message says why; ask your Helix admin for rule changes.

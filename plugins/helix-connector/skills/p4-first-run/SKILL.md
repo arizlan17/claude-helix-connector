@@ -26,10 +26,10 @@ Delegate this step to the `p4-discoverer` agent (read-only). If it cannot run a 
 | Workspace name, Root, view (depot to local mapping) | `query_workspaces` or `p4 client -o` |
 | Groups you belong to, ticket timeout | `p4 groups -u <user>` then `p4 group -o <group>` (field `Timeout`) |
 | Project layout under the view's depot roots | `p4 dirs <root>/*`. Streams depot? `p4 streams -m 5` (empty or error means classic paths) |
-| Effective access per top-level folder | For each folder: `p4 protects -m -u <user> <folder>/x`. Result is one of `list`, `read`, `open`, `write`, `review`, `owner`, `admin`, `super`. Treat `write` and above as writable; anything lower as read-only |
+| Effective access per top-level folder | For each folder: `p4 protects -m <folder>/x` (no `-u`: only admins may ask about other users, and this is about you). Result is one of `list`, `read`, `open`, `write`, `review`, `owner`, `admin`, `super`. Treat `write` and above as writable; anything lower as read-only |
 | Lines you cannot see at all | `p4 protects -m` shows `none`/no result: treat as not accessible |
 | MCP policy | `p4 property -l -A` and look for `mcp.*` (`mcp.enabled`, `mcp.toolsets.write`, `mcp.toolsets.allowed`). May be hidden; then say unknown |
-| Your highest access level | `p4 protects -m -u <user> //...`. If it is `admin` or `super`, stop and tell the user: Claude acts as this user and could change server rules. Ask them to use a normal account, or to accept the risk explicitly before you continue |
+| Your highest access level | `p4 protects -m //...`. If it is `admin` or `super`, stop and tell the user: Claude acts as this user and could change server rules. Ask them to use a normal account, or to accept the risk explicitly before you continue |
 | Existing local files | `.p4config`, `.p4ignore`, `CLAUDE.md`, `.claude/settings.json` if present |
 
 Record the results in a short table for the user.

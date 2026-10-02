@@ -19,7 +19,7 @@ function Find-P4([string]$Hint) {
 
 # Locate the P4 MCP server executable (P4MCP_BIN, PATH, or the kit's per-user folder).
 function Find-P4Mcp {
-    $cands = @($env:P4MCP_BIN, (Get-Command p4-mcp-server -ErrorAction SilentlyContinue).Source) | Where-Object { $_ }
+    $cands = @(@($env:P4MCP_BIN, (Get-Command p4-mcp-server -ErrorAction SilentlyContinue).Source) | Where-Object { $_ })
     $dir = Join-Path $env:LOCALAPPDATA 'claude-helix\p4mcp'
     if (Test-Path $dir) { $cands += (Get-ChildItem $dir -Recurse -Filter p4-mcp-server.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName) }
     foreach ($c in $cands) { if ($c -and (Test-Path $c)) { return (Resolve-Path $c).Path } }
@@ -34,7 +34,7 @@ function Invoke-P4([string]$P4, [string]$Port, [string]$User, [string[]]$P4Args)
 
 # Highest permission this user has anywhere in the depot (list/read/open/write/review/owner/admin/super), or $null.
 function Get-P4AccessLevel([string]$P4, [string]$Port, [string]$User) {
-    $out = Invoke-P4 $P4 $Port $User @('protects', '-m', '-u', $User, '//...')
+    $out = Invoke-P4 $P4 $Port $User @('protects', '-m', '//...')
     $w = ("$out".Trim() -split '\s+')[0]
     if ($w -match '^(list|read|open|write|review|owner|admin|super)$') { return $w.ToLower() }
     return $null

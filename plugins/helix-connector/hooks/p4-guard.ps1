@@ -1,7 +1,7 @@
-# PreToolUse hook for the Bash tool. Blocks p4 commands that could change or delete the Helix server's
-# rules and permissions (protections, groups, users, properties, depots, triggers, ...). Reading them is allowed.
-# Exit code 2 = block, with the reason on stderr. Any parse problem fails open (the server's own
-# permissions are still the real enforcement; this hook is an extra layer).
+# PreToolUse hook for the Bash and PowerShell tools. Blocks p4 commands that could change or delete the
+# Helix server's rules and permissions (protections, groups, users, properties, depots, triggers, ...).
+# Reading them is allowed. Exit code 2 = block, with the reason on stderr. Any parse problem fails open
+# (the server's own permissions are still the real enforcement; this hook is an extra layer).
 $ErrorActionPreference = 'Stop'
 try { $in = [Console]::In.ReadToEnd() | ConvertFrom-Json } catch { exit 0 }
 $cmd = [string]$in.tool_input.command
@@ -14,20 +14,33 @@ $blocked = 'admin', 'obliterate', 'passwd', 'license', 'unload', 'reload', 'arch
            'grant-permission', 'revoke-permission', 'extension', 'counter', 'key', 'monitor'
 # Global p4 options that take a separate value.
 $valued = 'c', 'C', 'd', 'H', 'L', 'p', 'P', 'r', 'u', 'v', 'x', 'Q', 'E'
+# Words that put the next token in command position (so "Start-Process p4d" is a command, "Get-Process p4d" is not).
+$launchers = '&', '.', 'start-process', 'start', 'call', 'sudo', 'exec', 'nohup', 'time', 'command', 'invoke-expression', 'iex'
 
 function Get-Tokens([string]$s) {
     [regex]::Matches($s, '"[^"]*"|''[^'']*''|\S+') | ForEach-Object { $_.Value.Trim('"', "'") }
 }
+function Get-Leaf([string]$t) { ($t -split '[\\/]')[-1] -replace '\.exe$', '' }
 
 function Find-Violation([string]$text, [int]$depth) {
     if ($depth -gt 3) { return $null }
-    foreach ($seg in ($text -split '\|\||&&|;|\||&|\r?\n')) {
+    foreach ($seg in ($text -split '\|\||&&|;|\||\r?\n')) {
         $tok = @(Get-Tokens $seg)
         for ($i = 0; $i -lt $tok.Count; $i++) {
-            $leaf = ($tok[$i] -split '[\\/]')[-1] -replace '\.exe$', ''
-            if ($leaf -ieq 'p4d') { return 'p4d (server administration) is not allowed' }
-            if ($tok[$i] -match '\s') { $r = Find-Violation $tok[$i] ($depth + 1); if ($r) { return $r }; continue }
-            if ($leaf -ine 'p4') { continue }
+            $leaf = Get-Leaf $tok[$i]
+            $isP4 = $leaf -ieq 'p4'
+            $atStart = ($i -eq 0) -or ($launchers -contains $tok[$i - 1].ToLower())
+            if ($leaf -ieq 'p4d' -and $atStart) { return 'p4d (server administration) is not allowed' }
+            # a quoted path with spaces, such as "C:\Program Files\Perforce\p4.exe", is still the p4 program
+            if ($tok[$i] -match '\s' -and -not $isP4) {
+                # only look inside a quoted string when it is handed to a shell (powershell -Command "...", bash -c '...', cmd /c "...")
+                $prev = if ($i -gt 0) { $tok[$i - 1].ToLower() } else { '' }
+                if ($prev -in '-command', '-c', '-lc', '-ic', '/c', '/k', '-encodedcommand' -or $launchers -contains $prev) {
+                    $r = Find-Violation $tok[$i] ($depth + 1); if ($r) { return $r }
+                }
+                continue
+            }
+            if (-not $isP4) { continue }
             # skip global options to reach the subcommand
             $j = $i + 1
             while ($j -lt $tok.Count -and $tok[$j].StartsWith('-')) {
@@ -50,8 +63,7 @@ function Find-Violation([string]$text, [int]$depth) {
     return $null
 }
 
-$why = $null
-if (-not $why) { $why = Find-Violation $cmd 0 }
+$why = Find-Violation $cmd 0
 if ($why) {
     [Console]::Error.WriteLine("Blocked by helix-connector: $why. Claude may read Helix rules and permissions but never edit or delete them. Ask your Helix admin.")
     exit 2

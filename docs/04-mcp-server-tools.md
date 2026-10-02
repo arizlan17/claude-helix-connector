@@ -109,7 +109,7 @@ An admin controls MCP from the server (read-only, off per person, or a global ki
 Claude can read protections, groups, users and MCP policy, but cannot edit or delete them. This is enforced in layers:
 1. **Server permissions (the real guarantee).** Claude acts as you. A normal developer account has no `admin` or `super` rights, so the server itself refuses `p4 protect`, `p4 group`, `p4 property` and similar changes. `onboard.ps1` checks your level and refuses `admin`/`super` accounts unless you pass `-AllowAdminAccount`. Use a normal account for Claude.
 2. **MCP toolsets.** The server allow-list (`mcp.toolsets.allowed`) exposes no tool that edits rules or permissions.
-3. **`p4-guard` hook.** A `PreToolUse` hook blocks Bash commands such as `p4 protect`, `p4 group -i/-d`, `p4 user -i/-d`, `p4 property -a/-d`, `p4 admin`, `p4 obliterate`, `p4 login` and `p4d`, while allowing reads (`p4 protects`, `p4 group -o`, `p4 property -l`). It ships with the plugin and `onboard.ps1` also copies it to `.claude/hooks/` with matching deny rules in `.claude/settings.json`.
+3. **`p4-guard` hook.** A `PreToolUse` hook blocks Bash and PowerShell commands such as `p4 protect`, `p4 group -i/-d`, `p4 user -i/-d`, `p4 property -a/-d`, `p4 admin`, `p4 obliterate`, `p4 login` and `p4d`, while allowing reads (`p4 protects`, `p4 group -o`, `p4 property -l`). It ships with the plugin and `onboard.ps1` also copies it to `.claude/hooks/` with matching deny rules in `.claude/settings.json`.
 
 The hook inspects the command text, so it is a safety net, not a security boundary: a determined workaround (for example building the command in a script) is stopped only by layer 1.
 
