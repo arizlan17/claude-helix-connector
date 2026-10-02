@@ -13,4 +13,6 @@ This folder is a Perforce workspace. Connection details (server, user, client) l
 - If a command reports the login is invalid or expired, stop and tell the user to run `p4 login` (it opens Google SSO in the browser).
 
 ## Project
+If `CODEBASE_NOTES.md` exists, read it before writing code and reuse the methods it lists (create it with `/helix-learn`).
+
 Match the existing module's conventions. Java projects here use Spring Boot 3 / Spring Batch 5 (`JobBuilder`, `StepBuilder`, explicit transaction manager). Build and test with `mvn verify`.
