@@ -1,0 +1,8 @@
+{
+  "_comment": "Optional defaults an admin can set before sharing the plugin. Leave p4port empty to detect it from the developer's own Perforce settings.",
+  "p4port": "",
+  "p4mcp": {
+    "version": "v2026.4.3078076",
+    "winZipUrl": "https://github.com/perforce/p4mcp-server/releases/download/v2026.4.3078076/p4-mcp-server-win.zip"
+  }
+}
