@@ -13,4 +13,6 @@ This folder is a Perforce workspace. Connection details (server, user, client) l
 - If a command reports the login is invalid or expired, stop and tell the user to run `p4 login` (it opens Google SSO in the browser).
 
 ## Project
+If `CODEBASE_NOTES.md` exists, read it before writing code and reuse the methods it lists (create it with `/helix-learn`).
+
 Describe this project's stack, conventions, and build/test commands here so Claude matches them.
