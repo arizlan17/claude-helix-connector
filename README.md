@@ -22,6 +22,13 @@ Google SSO through the Helix Authentication Service is **required**. `onboard.ps
 Then open the workspace folder in Claude Code, approve `perforce-p4-mcp`, and run `/helix-status`.
 
 ### Already have a Perforce user and workspace?
+**Easiest (no script, no clone):** install the plugin, open your workspace folder in Claude Code, and type:
+```
+/helix-connect
+```
+It detects your Perforce user, server and workspace, checks your login, refuses admin accounts, and writes only the missing `.p4config`, `.p4ignore`, `CLAUDE.md` and `.claude/settings.json`. It asks you only for what it cannot detect, never logs in for you (you run `! p4 login`), never trusts a certificate for you, and offers to download the P4 MCP server only if you say yes. Admins can pre-set the server address in `plugins/helix-connector/connect/connect.config.json` before sharing the plugin.
+
+**Alternative (script):** connect from the kit folder:
 Connect Claude to them without creating or syncing anything:
 ```powershell
 .\scripts\onboard.ps1 -ExistingWorkspace -User jsmith -Workspace jsmith-myproj -P4Port ssl:helix.company.com:1666
@@ -46,7 +53,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 | `scripts/add-developer.ps1` | Admin: add a person |
 | `scripts/set-mcp-policy.ps1` | Admin: MCP `Standard` / `ReadOnly` / `Off` / `Reset` per group or user |
 | `templates/` | `.p4config`, `.p4ignore`, `.mcp.json`, `CLAUDE.md` templates |
-| `plugins/helix-connector/` | Plugin: `.mcp.json`, 5 skills, 6 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`, `p4-discoverer`), `/helix-status`, `/helix-init`, and the `p4-guard` hook that blocks rule and permission changes |
+| `plugins/helix-connector/` | Plugin: `.mcp.json`, 7 skills, 7 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`, `p4-discoverer`), `/helix-status`, `/helix-connect`, `/helix-init`, and the `p4-guard` hook that blocks rule and permission changes |
 | `.claude-plugin/marketplace.json` | Marketplace definition |
 | `plugins/helix-connector/` codebase learning | `p4-codebase-learn` skill, `p4-codebase-analyst` agent and `/helix-learn`: read the existing code (read-only) and save `CODEBASE_NOTES.md` with the domain, conventions, best practices and reusable methods |
 | `docs/` | Numbered guides |
