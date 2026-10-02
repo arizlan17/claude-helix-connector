@@ -1,4 +1,4 @@
-# 10 - Skills, agents, commands and hook: what, why, how, and in what order
+# 02 - Skills, agents, commands and hook: what, why, how, and in what order
 
 Everything here ships in the `helix-connector` plugin. **Skills** are instructions Claude follows when the situation matches. **Agents** are focused helpers that run on their own with limited tools. **Commands** are shortcuts you type. The **hook** runs automatically.
 
@@ -109,4 +109,4 @@ Run steps 3 and 4 once per workspace, then again when the server rules or the co
 5. "Shelve it." `p4-submitter` shelves and gives you the changelist number.
 6. A human reviews. When you are ready: "Submit change 12345."
 
-Previous: [09 - System boundary and integration](09-system-boundary-and-integration.md) | Next: [11 - Existing workspace complete guide](11-existing-workspace-guide.md)
+Previous: [01 - System boundary and integration](01-system-boundary-and-integration.md) | Next: [03 - Complete guide](03-complete-guide.md)

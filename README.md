@@ -60,9 +60,11 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 6. [Admin operations](docs/06-admin-operations.md)
 7. [Troubleshooting](docs/07-troubleshooting.md)
 8. [Going live](docs/08-going-live.md)
-9. [System boundary and integration diagrams](docs/09-system-boundary-and-integration.md)
-10. [Skills, agents, commands and hook: what, why, how, order](docs/10-skills-and-agents-guide.md)
-11. [Existing workspace: complete guide](docs/11-existing-workspace-guide.md)
+
+**Already have a Perforce user and workspace?** Start at [docs/existing-workspace/](docs/existing-workspace/README.md):
+- [Complete guide](docs/existing-workspace/03-complete-guide.md)
+- [System boundary and integration diagrams](docs/existing-workspace/01-system-boundary-and-integration.md)
+- [Skills, agents, commands and hook: what, why, how, order](docs/existing-workspace/02-skills-and-agents-guide.md)
 
 ## Rules baked in
 - Perforce only, never git. Prefer MCP tools.

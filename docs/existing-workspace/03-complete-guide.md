@@ -1,6 +1,6 @@
-# 11 - Existing workspace: complete guide
+# 03 - Existing workspace: complete guide
 
-One page covering the whole setup for a developer who **already has a Perforce user and workspace** (Google SSO) and wants Claude Code to help write code and then work with Perforce. Details live in [09 diagrams](09-system-boundary-and-integration.md) and [10 skills and agents](10-skills-and-agents-guide.md).
+One page covering the whole setup for a developer who **already has a Perforce user and workspace** (Google SSO) and wants Claude Code to help write code and then work with Perforce. Details live in [01 diagrams](01-system-boundary-and-integration.md) and [02 skills and agents](02-skills-and-agents-guide.md).
 
 ## 1. What you get
 
@@ -31,7 +31,7 @@ flowchart LR
     CC <--> ANTH["Claude model service"]
 ```
 
-Full boundary and sequence diagrams: [09](09-system-boundary-and-integration.md).
+Full boundary and sequence diagrams: [01](01-system-boundary-and-integration.md).
 
 ## 3. Before you start
 
@@ -132,7 +132,7 @@ Rules Claude follows: Perforce only (no git); `edit` before changing a file; num
 | `p4-guard` agent | Secrets, `.p4config` or `main` in a change | Process check |
 | Shelve by default, submit on request | Accidental submits | Process rule |
 
-Server rules and permissions are read-only for Claude. Details: [docs/04](04-mcp-server-tools.md#server-rules-are-read-only-for-claude).
+Server rules and permissions are read-only for Claude. Details: [docs/04](../04-mcp-server-tools.md#server-rules-are-read-only-for-claude).
 
 ## 7. When something fails
 
@@ -148,7 +148,7 @@ Server rules and permissions are read-only for Claude. Details: [docs/04](04-mcp
 | A tool says it is blocked | A server MCP policy applies; do not work around it |
 | Google sign-in fails | Google email must equal your Perforce Email exactly |
 
-More: [07 Troubleshooting](07-troubleshooting.md), and the `p4-troubleshoot` skill.
+More: [07 Troubleshooting](../07-troubleshooting.md), and the `p4-troubleshoot` skill.
 
 ## 8. Files reference
 
@@ -169,4 +169,4 @@ More: [07 Troubleshooting](07-troubleshooting.md), and the `p4-troubleshoot` ski
 - No Swarm / code-review integration and no streams support.
 - Tested with a fake `p4` stand-in: the existing-workspace flow, admin refusal, and the guard hook (23 command cases). **Not yet tested:** against a real Helix server, Claude Code loading the hook and plugin, and the agents' restricted `Bash(p4 ...)` tool lists (they fall back to MCP tools and Read/Grep/Glob if not accepted).
 
-Previous: [10 - Skills and agents guide](10-skills-and-agents-guide.md)
+Previous: [02 - Skills and agents guide](02-skills-and-agents-guide.md)

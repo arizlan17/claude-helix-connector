@@ -1,4 +1,4 @@
-# 09 - System boundary and integration diagrams
+# 01 - System boundary and integration diagrams
 
 Applies to the **existing workspace** setup (`onboard.ps1 -ExistingWorkspace`): you already have a Perforce user and workspace, and sign in with Google SSO. Diagrams are Mermaid, so GitHub renders them.
 
@@ -170,4 +170,4 @@ flowchart LR
 
 Solid arrows create a file; dotted arrows merge into one that exists. Existing files are never overwritten.
 
-Next: [10 - Skills and agents guide](10-skills-and-agents-guide.md)
+Next: [02 - Skills and agents guide](02-skills-and-agents-guide.md)
