@@ -46,7 +46,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 | `scripts/add-developer.ps1` | Admin: add a person |
 | `scripts/set-mcp-policy.ps1` | Admin: MCP `Standard` / `ReadOnly` / `Off` / `Reset` per group or user |
 | `templates/` | `.p4config`, `.p4ignore`, `.mcp.json`, `CLAUDE.md` templates |
-| `plugins/helix-connector/` | Plugin: `.mcp.json`, 5 skills, 6 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`, `p4-discoverer`), `/helix-status`, `/helix-init` |
+| `plugins/helix-connector/` | Plugin: `.mcp.json`, 5 skills, 6 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`, `p4-discoverer`), `/helix-status`, `/helix-init`, and the `p4-guard` hook that blocks rule and permission changes |
 | `.claude-plugin/marketplace.json` | Marketplace definition |
 | `docs/` | Numbered guides |
 
@@ -65,6 +65,7 @@ The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.
 - Developers write `dev/` and `features/`, read `main`.
 - Shelve by default; submit only when asked in that turn.
 - No passwords or tickets in files, chat, or the depot.
+- Claude can read server rules and permissions but not edit or delete them (admin/super accounts are refused at onboarding; a `p4-guard` hook blocks the commands).
 - The server certificate is pinned by fingerprint during onboarding.
 
 ## Tested

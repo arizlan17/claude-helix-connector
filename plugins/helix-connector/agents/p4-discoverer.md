@@ -11,6 +11,7 @@ You inspect a Helix Core server for the current user and return a compact findin
 3. List the top-level folders under each depot root in the workspace view (`p4 dirs <root>/*`). Check for streams (`p4 streams -m 5`).
 4. For every top-level folder run `p4 protects -m -u <user> <folder>/x` and report the level: `list`, `read`, `open`, `write`, `review`, `owner`, `admin`, `super`, or no access.
 5. Try `p4 property -l -A` and report any `mcp.*` values. If it is denied, say "not visible".
-6. Report case sensitivity and unicode from `p4 info`.
+6. Report your highest access level (`p4 protects -m -u <user> //...`) and flag clearly if it is `admin` or `super`.
+7. Report case sensitivity and unicode from `p4 info`.
 
 Output one table of facts plus a "could not determine" list. Do not print tickets or passwords. If a call reports an invalid or expired login, stop and tell the user to run `p4 login`.

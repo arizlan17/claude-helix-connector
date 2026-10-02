@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(p4d*)",
+      "Bash(*add-developer.ps1*)",
+      "Bash(*set-mcp-policy.ps1*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .claude/hooks/p4-guard.ps1"
+          }
+        ]
+      }
+    ]
+  }
+}

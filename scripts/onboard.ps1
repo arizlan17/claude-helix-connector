@@ -25,6 +25,7 @@ param(
     [switch]$InstallMcp,                            # download the P4 MCP server without asking
     [switch]$SkipLogin,                             # for automation/tests: do not run p4 login
     [switch]$SkipSync,
+    [switch]$AllowAdminAccount,                     # proceed even if your Perforce user has admin/super rights (not recommended)
     [switch]$ExistingWorkspace,                     # connect to a workspace you already have: no workspace creation, no sync, no overwrites
     [string]$P4Port                                 # server address for -ExistingWorkspace (defaults to p4port in connector.config.json)
 )
@@ -92,6 +93,8 @@ if ($ExistingWorkspace) {
         Write-Ok 'signed in'
     }
 
+    if (-not $SkipLogin) { Assert-NotAdminAccount $p4 $port $User $AllowAdminAccount.IsPresent }
+
     Write-Step "Checking workspace $Workspace"
     if (-not (Invoke-P4 $p4 $port $User @('clients', '-e', $Workspace))) {
         Write-Bad "Workspace '$Workspace' not found on $port. Check the name with: p4 -u $User clients -u $User"
@@ -118,6 +121,7 @@ if ($ExistingWorkspace) {
         Write-Ok $name
     }
     if (-not (Test-Path (Join-Path $Root '.p4config'))) { Write-Bad '.p4config missing'; exit 1 }
+    Install-ClaudeGuard $Root
     Write-Host "`nDone. Open '$Root' in Claude Code, approve the 'perforce-p4-mcp' server, and try /helix-status." -ForegroundColor Green
     exit 0
 }
@@ -168,6 +172,7 @@ foreach ($name in $files.Keys) {
     [IO.File]::WriteAllText($target, (Expand-Template (Join-Path $tpl $files[$name]) $vals))
     Write-Ok $name
 }
+Install-ClaudeGuard $Root
 
 if ($SkipLogin) { Write-Warn2 'SkipLogin set: stopping before login.'; exit 0 }
 
@@ -177,6 +182,7 @@ try {
     & $p4 login
     if ($LASTEXITCODE -ne 0) { Write-Bad 'Login failed. Use the Google account whose email is registered for your Perforce user.'; exit 1 }
     Write-Ok ((Invoke-P4 $p4 $cfg.p4port $User @('login', '-s')) -join ' ')
+    Assert-NotAdminAccount $p4 $cfg.p4port $User $AllowAdminAccount.IsPresent
     $reg = ((Invoke-P4 $p4 $cfg.p4port $User @('user', '-o', $User)) | Where-Object { $_ -match '^Email:' }) -replace '^Email:\s*', ''
     if ($reg -and $reg.Trim() -ieq $GoogleEmail.Trim()) { Write-Ok "Google identity matches Perforce user email ($reg)" }
     else { Write-Warn2 "Perforce user email is '$reg' but you entered '$GoogleEmail'. Ask your admin to align them." }

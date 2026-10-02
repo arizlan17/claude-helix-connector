@@ -55,6 +55,41 @@ function Test-HelixAuthService([string]$Url) {
     } catch { return $false }
 }
 
+# Highest permission this user has anywhere in the depot (list/read/open/write/review/owner/admin/super), or $null.
+function Get-P4AccessLevel([string]$P4, [string]$Port, [string]$User) {
+    $out = Invoke-P4 $P4 $Port $User @('protects', '-m', '-u', $User, '//...')
+    $w = ("$out".Trim() -split '\s+')[0]
+    if ($w -match '^(list|read|open|write|review|owner|admin|super)$') { return $w.ToLower() }
+    return $null
+}
+
+# Claude acts as the signed-in user, so an account with admin/super could change server rules.
+# Refuse unless the user explicitly accepts it.
+function Assert-NotAdminAccount([string]$P4, [string]$Port, [string]$User, [bool]$Allow) {
+    $lvl = Get-P4AccessLevel $P4 $Port $User
+    if ($lvl -in 'admin', 'super') {
+        if (-not $Allow) {
+            Write-Bad "User '$User' has $lvl rights on the server. Claude acts as this user and could change permissions and rules."
+            Write-Host '    Use a normal (non-admin) Perforce account for Claude, or re-run with -AllowAdminAccount to accept the risk.'
+            exit 1
+        }
+        Write-Warn2 "Continuing with an $lvl account because -AllowAdminAccount was set. The p4-guard hook still blocks rule changes, but the server will not."
+    } elseif ($lvl) { Write-Ok "server access level: $lvl (cannot change rules or permissions)" }
+    else { Write-Warn2 'Could not determine your access level.' }
+}
+
+# Put the p4 guard hook and deny rules into the workspace so rule/permission edits are blocked even without the plugin.
+function Install-ClaudeGuard([string]$Root) {
+    $hookSrc = Join-Path $script:KitRoot 'plugins\helix-connector\hooks\p4-guard.ps1'
+    $hookDir = Join-Path $Root '.claude\hooks'
+    New-Item -ItemType Directory -Force $hookDir | Out-Null
+    Copy-Item $hookSrc (Join-Path $hookDir 'p4-guard.ps1') -Force
+    Write-Ok '.claude/hooks/p4-guard.ps1'
+    $settings = Join-Path $Root '.claude\settings.json'
+    if (Test-Path $settings) { Write-Warn2 '.claude/settings.json exists - left unchanged. Run /helix-init to merge the guard rules.' }
+    else { Copy-Item (Join-Path $script:KitRoot 'templates\claude-settings.json.template') $settings; Write-Ok '.claude/settings.json' }
+}
+
 function Write-Step([string]$Text) { Write-Host "==> $Text" -ForegroundColor Cyan }
 function Write-Ok([string]$Text)   { Write-Host "    OK  $Text" -ForegroundColor Green }
 function Write-Warn2([string]$Text){ Write-Host "    !!  $Text" -ForegroundColor Yellow }
