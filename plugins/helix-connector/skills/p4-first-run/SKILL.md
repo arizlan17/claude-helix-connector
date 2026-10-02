@@ -29,6 +29,7 @@ Delegate this step to the `p4-discoverer` agent (read-only). If it cannot run a 
 | Effective access per top-level folder | For each folder: `p4 protects -m -u <user> <folder>/x`. Result is one of `list`, `read`, `open`, `write`, `review`, `owner`, `admin`, `super`. Treat `write` and above as writable; anything lower as read-only |
 | Lines you cannot see at all | `p4 protects -m` shows `none`/no result: treat as not accessible |
 | MCP policy | `p4 property -l -A` and look for `mcp.*` (`mcp.enabled`, `mcp.toolsets.write`, `mcp.toolsets.allowed`). May be hidden; then say unknown |
+| Your highest access level | `p4 protects -m -u <user> //...`. If it is `admin` or `super`, stop and tell the user: Claude acts as this user and could change server rules. Ask them to use a normal account, or to accept the risk explicitly before you continue |
 | Existing local files | `.p4config`, `.p4ignore`, `CLAUDE.md`, `.claude/settings.json` if present |
 
 Record the results in a short table for the user.
@@ -54,6 +55,7 @@ Derive the branching guidance from the facts. Do not copy `main`/`dev`/`features
 Merge into `permissions` without removing existing entries:
 - `deny`: `Read`/`Edit`/`Write` on secrets (`.env`, `.env.*`, `secrets/**`, `*.pem`, `*.key`); `Edit`/`Write` on local folders that are **read-only** for this user; `Bash(git *)` (Perforce only).
 - `allow`: the read-only MCP tools (`query_*`) of `perforce-p4-mcp`, and `Edit` on local folders that are writable.
+- Add the guard: copy `${CLAUDE_PLUGIN_ROOT}/hooks/p4-guard.ps1` to `.claude/hooks/p4-guard.ps1` and add a `PreToolUse` hook (matcher `Bash`) that runs it, plus `deny` rules for `Bash(p4d*)`, `Bash(*add-developer.ps1*)`, `Bash(*set-mcp-policy.ps1*)`. It blocks any `p4` command that edits or deletes protections, groups, users, properties, depots or triggers, and allows reading them. Merge with existing hooks; never remove the user's own.
 - Leave `modify_files`, `modify_changelists`, `modify_shelves` out of `allow` so Claude asks before opening, shelving or submitting. If MCP is read-only, also put the `modify_*` tools in `deny`.
 - Use the exact tool names this session shows (they differ when the server is loaded from the plugin vs a project `.mcp.json`).
 
