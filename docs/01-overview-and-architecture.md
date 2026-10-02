@@ -41,7 +41,7 @@ Claude Code -> P4 MCP server (local process) -> reads the ticket -> Helix Core. 
 
 ## Security properties
 - Passwords never pass through Claude, the MCP server, or configuration files.
-- The Helix server certificate is **pinned** by fingerprint during onboarding; a changed certificate is refused.
+- The Helix server certificate must already be trusted (`p4 trust`, after you confirm the fingerprint with your admin); connecting never trusts it for you and a changed certificate is refused.
 - Helix Core runs at security level 4 with users created only by super users.
 - Developers cannot write `main`; the extension service account is a separate, audited identity.
 - MCP capability can be limited per group or user on the server.
@@ -50,9 +50,9 @@ Claude Code -> P4 MCP server (local process) -> reads the ticket -> Helix Core. 
 | Path | Purpose |
 |---|---|
 | `plugins/helix-connector/` | Claude Code plugin: MCP config, skills, agents, `/helix-status` command |
-| `scripts/onboard.ps1` | Developer: connect a PC and workspace |
+| `scripts/onboard.ps1` | Developer: connect an existing workspace (script alternative to `/helix-connect`) |
 | `scripts/check.ps1` | Developer: health check |
 | `templates/`, `connector.config.json` | Files the scripts generate from; one place to point at a server |
 | `docs/` | These guides |
 
-Next: [03 - Google SSO](03-google-sso-helix-auth.md)
+Next: [04 - The MCP server, tool by tool](04-mcp-server-tools.md)

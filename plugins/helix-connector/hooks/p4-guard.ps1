@@ -51,7 +51,6 @@ function Find-Violation([string]$text, [int]$depth) {
 }
 
 $why = $null
-if ($cmd -match '(?i)add-developer\.ps1|set-mcp-policy\.ps1') { $why = 'admin scripts must be run by an admin, not Claude' }
 if (-not $why) { $why = Find-Violation $cmd 0 }
 if ($why) {
     [Console]::Error.WriteLine("Blocked by helix-connector: $why. Claude may read Helix rules and permissions but never edit or delete them. Ask your Helix admin.")

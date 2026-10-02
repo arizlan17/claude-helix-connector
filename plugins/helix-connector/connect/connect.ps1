@@ -192,9 +192,7 @@ Put '.claude/settings.json' @'
 {
   "permissions": {
     "deny": [
-      "Bash(p4d*)",
-      "Bash(*add-developer.ps1*)",
-      "Bash(*set-mcp-policy.ps1*)"
+      "Bash(p4d*)"
     ]
   }
 }

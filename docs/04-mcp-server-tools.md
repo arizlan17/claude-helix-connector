@@ -85,7 +85,7 @@ Useful options: `--readonly` (client-side read-only), `--toolsets a b c` (limit 
 - **Why:** The default hand-off. A shelf stores work on the server without touching `dev` or `main`, so a human can review first.
 
 ### `modify_workspaces`
-- **Why:** Create or adjust workspaces. Usually left to `onboard.ps1`; Claude rarely needs it.
+- **Why:** Create or adjust workspaces. Claude rarely needs it; your existing workspace is used as is.
 
 ### `modify_jobs`
 - **Why:** Attach jobs to changelists where jobs are used.

@@ -26,33 +26,10 @@ function Find-P4Mcp {
     return $null
 }
 
-# Send a Perforce form (or answers) to `p4 <cmd>` over stdin using exact bytes.
-# PowerShell pipes add a BOM/CRLF that break p4 forms, so use a temp file and cmd redirection.
-function Invoke-P4Form([string]$P4, [string]$Port, [string]$User, [string]$Text, [string]$Cmd) {
-    $tmp = [IO.Path]::GetTempFileName()
-    try {
-        [IO.File]::WriteAllText($tmp, $Text)
-        $line = '"{0}" -p {1} -u {2} {3} < "{4}"' -f $P4, $Port, $User, $Cmd, $tmp
-        cmd /c $line 2>&1
-    } finally { [IO.File]::Delete($tmp) }
-}
-
 # Run p4 quietly and return output lines. Errors on stderr are captured, not thrown.
 function Invoke-P4([string]$P4, [string]$Port, [string]$User, [string[]]$P4Args) {
     $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
     try { & $P4 -p $Port -u $User @P4Args 2>&1 | ForEach-Object { "$_" } } finally { $ErrorActionPreference = $old }
-}
-
-# TCP-level reachability check for the Helix Authentication Service (avoids TLS trust prompts on its cert).
-function Test-HelixAuthService([string]$Url) {
-    try {
-        $u = [Uri]$Url
-        $c = New-Object Net.Sockets.TcpClient
-        $iar = $c.BeginConnect($u.Host, $u.Port, $null, $null)
-        $ok = $iar.AsyncWaitHandle.WaitOne(3000) -and $c.Connected
-        $c.Close()
-        return [bool]$ok
-    } catch { return $false }
 }
 
 # Highest permission this user has anywhere in the depot (list/read/open/write/review/owner/admin/super), or $null.

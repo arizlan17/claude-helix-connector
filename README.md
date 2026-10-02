@@ -1,85 +1,71 @@
-# Claude + Helix Core connector kit
+# Claude + Helix Core: existing workspace kit
 
-Lets Claude Code work with Perforce Helix Core (read, edit, shelve, submit on request) with **Google SSO** through Helix Authentication. Version 0.1.0.
+Lets Claude Code work with a Perforce Helix Core workspace you **already have** (Google SSO user, existing workspace): read, edit, shelve, and submit on request. Developer-facing only: no server setup, no admin tools. Windows only for now. Version 0.1.0.
 
-## Before you start
-Your Helix admin must give you:
-- a Perforce user whose **Email** is your Google account address (exact match)
-- group membership for your project paths
-- the server settings in `connector.config.json` (`p4port`, `serverFingerprint`, `depotRoot`, `auth.serviceUrl`)
+## What you need
+- A Perforce user whose **Email** is your Google account address (exact match), and an existing workspace. Your Helix admin sets these up.
+- A normal (non-admin) account. Connecting refuses `admin`/`super` accounts.
+- The `p4` command line client and Claude Code.
+- The server certificate already trusted (`p4 trust`, after confirming the fingerprint with your admin).
 
-You also need the `p4` command line client and Claude Code on Windows.
+## Connect (order)
+1. Install the plugin:
+   ```
+   /plugin marketplace add <path-or-git-url-of-this-repo>
+   /plugin install helix-connector@mds-helix
+   ```
+2. Open your **workspace folder** in Claude Code.
+3. If you are not signed in, run `! p4 login` yourself (Google opens). Claude never logs in for you.
+4. Type `/helix-connect`. It detects your Perforce user, server and workspace, checks trust and login, refuses admin accounts, and writes only the missing `.p4config`, `.p4ignore`, `CLAUDE.md` and `.claude/settings.json`. It asks only for what it cannot detect and offers to download the P4 MCP server only if you say yes.
+5. Restart Claude Code once and approve `perforce-p4-mcp`.
+6. Run `/helix-status`, then `/helix-init` (learn the server's rules for your user), then `/helix-learn` (learn the code).
+7. Work: code, `p4-guard` check, review, shelve, and submit when you ask.
 
-## Quick start
+Full walkthrough with diagrams: [docs/existing-workspace](docs/existing-workspace/README.md).
 
-Your Helix admin adds your user first (see above), then:
-
+### Script alternative
+If you prefer a script to `/helix-connect`, clone this repo and run:
 ```powershell
-# 1. Connect this PC and a workspace folder (opens Google sign-in)
-.\scripts\onboard.ps1 -User jsmith -Root D:\work\mds -GoogleEmail john.smith@mitrai.com
+.\scripts\onboard.ps1 -User jsmith -Workspace jsmith-myproj -P4Port ssl:helix.company.com:1666
+.\scripts\check.ps1 -Root D:\work\myproj
+```
+It does the same checks and also writes `.mcp.json` and copies the guard hook into the workspace. It never creates a workspace, syncs, trusts a certificate, or overwrites a file.
 
-# 2. Check everything
-.\scripts\check.ps1 -Root D:\work\mds
-```
-Google SSO through the Helix Authentication Service is **required**. `onboard.ps1` asks for the Google account email you will sign in with (or takes it from `-GoogleEmail`), confirms the Authentication Service in `connector.config.json` (`auth.serviceUrl`) is reachable, and after login checks that the email matches your Perforce user. If the service is down, onboarding stops before anything is written. Details: [docs/03](docs/03-google-sso-helix-auth.md).
-Then open the workspace folder in Claude Code, approve `perforce-p4-mcp`, and run `/helix-status`.
-
-### Already have a Perforce user and workspace?
-**Easiest (no script, no clone):** install the plugin, open your workspace folder in Claude Code, and type:
-```
-/helix-connect
-```
-It detects your Perforce user, server and workspace, checks your login, refuses admin accounts, and writes only the missing `.p4config`, `.p4ignore`, `CLAUDE.md` and `.claude/settings.json`. It asks you only for what it cannot detect, never logs in for you (you run `! p4 login`), never trusts a certificate for you, and offers to download the P4 MCP server only if you say yes. Admins can pre-set the server address in `plugins/helix-connector/connect/connect.config.json` before sharing the plugin.
-
-**Order:** install the plugin, open your workspace folder in Claude Code, `! p4 login` if needed, `/helix-connect`, restart Claude Code once and approve `perforce-p4-mcp`, then `/helix-status`, `/helix-init`, `/helix-learn`. Full order with diagrams: [docs/existing-workspace](docs/existing-workspace/README.md).
-
-**Alternative (script):** connect from the kit folder:
-Connect Claude to them without creating or syncing anything:
-```powershell
-.\scripts\onboard.ps1 -ExistingWorkspace -User jsmith -Workspace jsmith-myproj -P4Port ssl:helix.company.com:1666
-```
-This checks the server and your login (runs `p4 login` only if your ticket expired), confirms the workspace exists, and takes the folder from the workspace's Root unless you pass `-Root`. It writes `.p4config`, `.p4ignore`, `.mcp.json` and `CLAUDE.md` only if they are missing, and never overwrites existing ones. It skips the Google email prompt, the Authentication Service check, certificate pinning, workspace creation and sync. Your `p4 trust` must already be in place. The generated `CLAUDE.md` is generic: add your own stack and build commands, and follow your project's branching rules.
-
-### Install the Claude Code plugin (skills, agents, command)
-From a private repository that contains this folder as its root:
-```
-/plugin marketplace add <path-or-git-url-of-this-folder>
-/plugin install helix-connector@mds-helix
-```
-For local testing, point `marketplace add` at this `connector` folder.
-The plugin's MCP config reads the server path from `P4MCP_BIN` (set by `onboard.ps1`).
+## What is in the plugin
+| Piece | What it gives you |
+|---|---|
+| `/helix-connect` (skill `p4-connect`) | Connect this folder to Claude |
+| `/helix-status` | Who you are, workspace, ticket, pending changes |
+| `/helix-init` (skill `p4-first-run`, agent `p4-discoverer`) | Reads the live server's rules for you and updates `CLAUDE.md`, `.claude/settings.json`, `.p4config`, `.p4ignore` |
+| `/helix-learn` (skill `p4-codebase-learn`, agent `p4-codebase-analyst`) | Learns the code and saves `CODEBASE_NOTES.md` |
+| Skills `p4-helix`, `p4-feature-line`, `p4-shelve-review`, `p4-troubleshoot` | The Perforce workflow, shelving, and fixes |
+| Agents `p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter` | Read-only questions, review, standup summary, pre-flight check, and the only agent that writes |
+| `p4-guard` hook | Blocks any command that would edit or delete server rules and permissions |
 
 ## Contents
 | Path | What |
 |---|---|
-| `connector.config.json` | Server address, pinned fingerprint, depot layout, Authentication Service URL (`auth`), MCP download. Change this to point the kit at your live server |
-| `scripts/onboard.ps1` | Developer onboarding |
-| `scripts/check.ps1` | Developer health check (changes nothing) |
-| `templates/` | `.p4config`, `.p4ignore`, `.mcp.json`, `CLAUDE.md` templates |
-| `plugins/helix-connector/` | Plugin: `.mcp.json`, 7 skills, 7 agents (`p4-reader`, `p4-reviewer`, `p4-changelog`, `p4-guard`, `p4-submitter`, `p4-discoverer`), `/helix-status`, `/helix-connect`, `/helix-init`, and the `p4-guard` hook that blocks rule and permission changes |
+| `plugins/helix-connector/` | The plugin (skills, agents, commands, hook, `connect/connect.ps1`) |
 | `.claude-plugin/marketplace.json` | Marketplace definition |
-| `plugins/helix-connector/` codebase learning | `p4-codebase-learn` skill, `p4-codebase-analyst` agent and `/helix-learn`: read the existing code (read-only) and save `CODEBASE_NOTES.md` with the domain, conventions, best practices and reusable methods |
-| `docs/` | Numbered guides |
+| `connector.config.json` | Defaults for the `onboard.ps1` script (server address, MCP download) |
+| `plugins/helix-connector/connect/connect.config.json` | Defaults for `/helix-connect` (an admin may pre-set the server address before sharing) |
+| `scripts/` | `onboard.ps1`, `check.ps1`, `lib.ps1` |
+| `templates/` | `.p4config`, `.p4ignore`, `.mcp.json`, `CLAUDE.md`, `.claude/settings.json` templates |
+| `docs/` | Guides |
 
 ## Documentation
-1. [Overview and architecture](docs/01-overview-and-architecture.md)
-2. [Google SSO with Helix Authentication](docs/03-google-sso-helix-auth.md)
-3. [The MCP server, tool by tool](docs/04-mcp-server-tools.md)
-4. [Using Claude Code day to day](docs/05-claude-code-workflow.md)
-5. [Troubleshooting](docs/07-troubleshooting.md)
-
-**Already have a Perforce user and workspace?** Start at [docs/existing-workspace/](docs/existing-workspace/README.md):
-- [Complete guide](docs/existing-workspace/03-complete-guide.md)
-- [System boundary and integration diagrams](docs/existing-workspace/01-system-boundary-and-integration.md)
-- [Skills, agents, commands and hook: what, why, how, order](docs/existing-workspace/02-skills-and-agents-guide.md)
+- [docs/existing-workspace/](docs/existing-workspace/README.md): start here (complete guide, diagrams, skills and agents)
+- [Overview and architecture](docs/01-overview-and-architecture.md)
+- [The MCP server, tool by tool](docs/04-mcp-server-tools.md)
+- [Using Claude Code day to day](docs/05-claude-code-workflow.md)
+- [Troubleshooting](docs/07-troubleshooting.md)
 
 ## Rules baked in
 - Perforce only, never git. Prefer MCP tools.
-- Developers write `dev/` and `features/`, read `main`.
 - Shelve by default; submit only when asked in that turn.
 - No passwords or tickets in files, chat, or the depot.
-- Claude can read server rules and permissions but not edit or delete them (admin/super accounts are refused at onboarding; a `p4-guard` hook blocks the commands).
-- The server certificate is pinned by fingerprint during onboarding.
+- Claude can read server rules and permissions but not edit or delete them (admin/super accounts are refused; the `p4-guard` hook blocks the commands).
+- Follow your project's own branching rules (`/helix-init` records what your account can write).
 
 ## Tested
-`onboard.ps1` (including refusal of a wrong fingerprint), `check.ps1`. Not yet tested end to end: Claude Code calling the MCP tools (needs a session restart), and `/plugin install` from a marketplace.
+`/helix-connect`'s script, `onboard.ps1` and the guard hook, against a fake `p4` stand-in. Not yet tested: a real Helix server, Claude Code loading the plugin, command and hook, and `/plugin install` from a marketplace.

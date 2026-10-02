@@ -1,11 +1,14 @@
 # 05 - Using Claude Code with Helix Core, day to day
 
 ## One-time setup (developer)
-1. Ask your Helix admin to add you with your Google email as your Perforce user's Email.
-2. Run `scripts\onboard.ps1 -User <your.user> -Root <your workspace folder>`. It pins the server fingerprint, writes `.p4config`, `.mcp.json`, `CLAUDE.md`, opens Google sign-in, creates your workspace and syncs.
-3. Install the Claude Code plugin from the kit (see README), then open the workspace folder in Claude Code.
-4. Approve the `perforce-p4-mcp` server when asked.
-5. Run `/helix-status`. You should see your user, workspace, and pending changes.
+1. Make sure your Perforce user (Email = your Google account) and workspace exist; ask your Helix admin if not.
+2. Install the Claude Code plugin (see README) and open your workspace folder in Claude Code.
+3. If you are not signed in, run `! p4 login` yourself (Google opens).
+4. Run `/helix-connect`. It detects your user, server and workspace, checks the server certificate is trusted and that you are not an admin, and writes the missing `.p4config`, `.p4ignore`, `CLAUDE.md` and `.claude/settings.json`.
+5. Restart Claude Code once and approve the `perforce-p4-mcp` server when asked.
+6. Run `/helix-status`. You should see your user, workspace, and pending changes. Then `/helix-init` and `/helix-learn`.
+
+Details and diagrams: [existing-workspace docs](existing-workspace/README.md). Script alternative: `scripts\onboard.ps1 -User <you> -Workspace <name> -P4Port <server>`.
 
 ## Every morning
 Tickets last 12 hours. If Claude says the login is invalid or expired:

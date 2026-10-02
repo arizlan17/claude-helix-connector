@@ -55,7 +55,7 @@ Derive the branching guidance from the facts. Do not copy `main`/`dev`/`features
 Merge into `permissions` without removing existing entries:
 - `deny`: `Read`/`Edit`/`Write` on secrets (`.env`, `.env.*`, `secrets/**`, `*.pem`, `*.key`); `Edit`/`Write` on local folders that are **read-only** for this user; `Bash(git *)` (Perforce only).
 - `allow`: the read-only MCP tools (`query_*`) of `perforce-p4-mcp`, and `Edit` on local folders that are writable.
-- Add the guard: copy `${CLAUDE_PLUGIN_ROOT}/hooks/p4-guard.ps1` to `.claude/hooks/p4-guard.ps1` and add a `PreToolUse` hook (matcher `Bash`) that runs it, plus `deny` rules for `Bash(p4d*)`, `Bash(*add-developer.ps1*)`, `Bash(*set-mcp-policy.ps1*)`. It blocks any `p4` command that edits or deletes protections, groups, users, properties, depots or triggers, and allows reading them. Merge with existing hooks; never remove the user's own.
+- Add the guard: copy `${CLAUDE_PLUGIN_ROOT}/hooks/p4-guard.ps1` to `.claude/hooks/p4-guard.ps1` and add a `PreToolUse` hook (matcher `Bash`) that runs it, plus `deny` rules for `Bash(p4d*)`. It blocks any `p4` command that edits or deletes protections, groups, users, properties, depots or triggers, and allows reading them. Merge with existing hooks; never remove the user's own.
 - Leave `modify_files`, `modify_changelists`, `modify_shelves` out of `allow` so Claude asks before opening, shelving or submitting. If MCP is read-only, also put the `modify_*` tools in `deny`.
 - Use the exact tool names this session shows (they differ when the server is loaded from the plugin vs a project `.mcp.json`).
 
